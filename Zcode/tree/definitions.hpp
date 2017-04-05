@@ -67,6 +67,10 @@ struct definitions<2>
     static const Node AllExceptVoidbit=AllSet2One<2,size>::value-voidbit;
 
     static constexpr std::array<std::size_t, nlevels> Ones{Ones_array<nlevels>(2, Xbit)};
+    static constexpr std::array<std::size_t, nlevels> AllOnes{Ones_array<nlevels>(2, XYZbit)};
+    static constexpr std::array<std::size_t, 4> TailGen{0, Ybit, Xbit, Xbit + Ybit};
+    static const Node XMask = Ones[nlevels-1]; 
+    static const Node YMask = XMask>>1;
 };
 
 template <>
@@ -139,9 +143,15 @@ struct definitions<3>
     static const int nbneighb=27;
 
     static constexpr std::array<std::size_t, nlevels> Ones{Ones_array<nlevels>(3, Xbit)};
+    static constexpr std::array<std::size_t, nlevels> AllOnes{Ones_array<nlevels>(3, XYZbit)};
+    static const Node XMask = Ones[nlevels-1]; 
+    static const Node YMask = XMask>>1;
+    static const Node ZMask = YMask>>1;
     
 };
 
 //template <std::size_t dim>
 constexpr std::array<std::size_t, definitions<2>::nlevels> definitions<2>::Ones;
+constexpr std::array<std::size_t, definitions<2>::nlevels> definitions<2>::AllOnes;
 constexpr std::array<std::size_t, definitions<3>::nlevels> definitions<3>::Ones;
+constexpr std::array<std::size_t, definitions<3>::nlevels> definitions<3>::AllOnes;
