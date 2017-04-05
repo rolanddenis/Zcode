@@ -1,5 +1,6 @@
 #pragma once
 #include <array>
+#include <utility>
 /////////////////////////////////////////////////////////////////////////
 ///
 /// Generate a number with all digits in range (0,n-1) set to one
