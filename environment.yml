@@ -1,0 +1,7 @@
+name: Zcode
+channels:
+  - nodefaults
+  - conda-forge
+  - SylvainCorlay
+dependencies:
+  - cling_ubuntu14
