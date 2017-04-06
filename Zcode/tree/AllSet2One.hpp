@@ -13,15 +13,13 @@
 ///
 /// \brief generate a number with digits (0,n-1) set to 1.
 ////////////////////////////////////////////////////////////////////////
-template<int dim,int n> struct AllSet2One
+template<int dim, int n, typename node_type> struct AllSet2One
 {
-  typedef std::size_t Node;
-  static const Node value= (AllSet2One<dim,n-1>::value<<1)+1;
+  static const node_type value= (AllSet2One<dim, n-1, node_type>::value<<1)+1;
 };
-template<int dim> struct AllSet2One<dim,0>
+template<int dim, typename node_type> struct AllSet2One<dim, 0, node_type>
 {
-  typedef std::size_t Node;
-  static const Node value= 0;
+  static const node_type value= 0;
 };
 
 // Construction of Ones array
@@ -48,9 +46,30 @@ constexpr auto Ones_array(std::size_t dim, std::size_t bit) {
 
 // // C++ 17 version
 // template <std::size_t levels>
-// auto Ones_array(std::size_t dim, std::size_t bit){
+// constexpr auto Ones_array(std::size_t dim, std::size_t bit){
 //   std::array<std::size_t, levels> a{bit};
 //   for (std::size_t i=1; i<levels; i++)
 //     a[i] = a[i-1] + bit>>(dim*i);
 //   return a;
 // }
+
+constexpr std::size_t max_level(std::size_t dim, std::size_t freebits, std::size_t size)
+{
+  std::size_t tmp = size - freebits, level = 0;
+  
+  while (tmp/dim > (1 << level))
+  {
+    tmp--;
+    level++;
+  }
+  return level;
+}
+
+
+constexpr std::size_t ipow_impl(int64_t base, int exp, int64_t result = 1) {
+  return exp < 1 ? result : ipow_impl(base*base, exp/2, (exp % 2) ? result*base : result);
+}
+
+constexpr std::size_t ipow(int64_t base, int exp) {
+  return ipow_impl(base, exp);
+}
