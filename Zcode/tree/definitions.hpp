@@ -2,6 +2,7 @@
 #include <cmath>
 
 #include <tree/AllSet2One.hpp>
+#include <tree/zcurve.hpp>
 
 template <std::size_t dim, typename node_type=std::size_t>
 struct definitions
@@ -63,7 +64,7 @@ struct definitions
 
     static constexpr std::array<std::size_t, nlevels> Ones{Ones_array<nlevels>(dim, Xbit)};
     static constexpr std::array<std::size_t, nlevels> AllOnes{Ones_array<nlevels>(dim, XYZbit)};
-    static constexpr std::array<std::size_t, 4> TailGen{0, Ybit, Xbit, Xbit + Ybit};
+    static constexpr std::array<node_type, ipow(2, dim)> TailGen{zcurve<dim, node_type>(Xbit, Ybit, Zbit)};
     static const node_type XMask = Ones[nlevels-1]; 
     static const node_type YMask = XMask>>1;
     static const node_type ZMask = ZMask>>1;
@@ -71,5 +72,9 @@ struct definitions
 
 template <std::size_t dim, typename node_type>
 constexpr std::array<std::size_t, definitions<dim, node_type>::nlevels> definitions<dim, node_type>::Ones;
+
 template <std::size_t dim, typename node_type>
 constexpr std::array<std::size_t, definitions<dim, node_type>::nlevels> definitions<dim, node_type>::AllOnes;
+
+template <std::size_t dim, typename node_type>
+constexpr std::array<node_type, ipow(2, dim)> definitions<dim, node_type>::TailGen;
