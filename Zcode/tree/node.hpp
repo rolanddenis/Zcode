@@ -8,7 +8,6 @@ template <std::size_t dim, typename node_type=std::size_t>
 struct Node: public definitions<dim, node_type>
 {
     using definitions<dim, node_type>::size;
-    using definitions<dim, node_type>::nblevelbits;
     using definitions<dim, node_type>::nlevels;
     using definitions<dim, node_type>::levelshift;
     using definitions<dim, node_type>::levelmask;
@@ -45,7 +44,7 @@ struct Node: public definitions<dim, node_type>
     }
     inline Node plus(direction d, int depth) const{
         Node Dec = _get_dec(d, depth);
-        return {(*this&Dec)? ((*this-Dec).plus(d,depth-1)) : (*this+Dec)};
+        return {(*this&Dec)? ((*this-Dec).plus(d, depth-1)) : (*this+Dec)};
     }
 
     inline Node minus(direction d, int depth) const{

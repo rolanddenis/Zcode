@@ -67,7 +67,7 @@ struct definitions
     static constexpr std::array<node_type, ipow(2, dim)> TailGen{zcurve<dim, node_type>(Xbit, Ybit, Zbit)};
     static const node_type XMask = Ones[nlevels-1]; 
     static const node_type YMask = XMask>>1;
-    static const node_type ZMask = ZMask>>1;
+    static const node_type ZMask = YMask>>1;
 };
 
 template <std::size_t dim, typename node_type>
