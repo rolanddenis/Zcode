@@ -54,6 +54,21 @@ constexpr auto Ones_array(std::size_t dim, node_type bit) {
     return Ones_array(dim, bit, std::make_index_sequence<size>{});
 }
 
+template <std::size_t n>
+constexpr int Stencil(int stencil) {
+  return -stencil + n;
+}
+
+template<std::size_t... i>
+constexpr auto Stencil_array(int stencil, std::index_sequence<i...>) {
+    return std::array<int, sizeof...(i)>{{Stencil<i>(stencil)...}};
+}
+
+template<std::size_t stencil>
+constexpr auto Stencil_array() {
+    return Stencil_array(stencil, std::make_index_sequence<2*stencil+1>{});
+}
+
 // // C++ 17 version
 // template <std::size_t levels>
 // constexpr auto Ones_array(std::size_t dim, std::size_t bit){

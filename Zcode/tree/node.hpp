@@ -116,38 +116,82 @@ struct Node: public definitions<dim, node_type>
         return {value+levelone};
     }
 
-    inline void boxNeighbor_impl(std::array<Node, 25> &P, int stencil, std::integral_constant<std::size_t, 2> const&) const
+    template<std::size_t nx>
+    inline void Neighbor_impl(std::array<Node, nx> &P, 
+                              std::array<int, nx> const& stencilx) const
     {
         std::size_t index = 0;
-        for(int j=-stencil; j<=stencil; j++)
+        for(auto &sx: stencilx)
         {
-            Node ny{*this};
+            P[index++] = (sx<0)? minus(direction::x, -sx): plus(direction::x, sx);
+        }
+    }
 
-            if (j<0)
-                ny = ny.minus(direction::y, -j);
-            if (j>0)
-                ny = ny.plus(direction::y, j);
-
-            for(int i=-stencil; i<=stencil; i++)
+    template<std::size_t nx, std::size_t ny>
+    inline void Neighbor_impl(std::array<Node, nx*ny> &P, 
+                              std::array<int, nx> const& stencilx, 
+                              std::array<int, ny> const& stencily) const
+    {
+        std::size_t index = 0;
+        for(auto &sy: stencily)
+        {
+            Node node_y = (sy<0)?minus(direction::y, -sy): plus(direction::y, sy);
+            for(auto &sx: stencilx)
             {
-                Node nx{ny};
-                if (i<0)
-                    nx = ny.minus(direction::x, -i);
-                if (i>0)
-                    nx = ny.plus(direction::x, i);
-    
-                P[index++] = nx;
+                P[index++] = (sx<0)? node_y.minus(direction::x, -sx): node_y.plus(direction::x, sx);
             }
         }
-        //P[4].value += voidbit;
+    }
+
+    template<std::size_t nx, std::size_t ny, std::size_t nz>
+    inline void Neighbor_impl(std::array<Node, nx*ny*nz> &P, 
+                              std::array<int, nx> const& stencilx, 
+                              std::array<int, ny> const& stencily, 
+                              std::array<int, nz> const& stencilz) const
+    {
+        std::size_t index = 0;
+        for(auto &sz: stencilz)
+        {
+            Node node_z = (sz<0)?minus(direction::z, -sz): plus(direction::z, sz);
+            for(auto &sy: stencily)
+            {
+                Node node_y = (sy<0)?node_z.minus(direction::y, -sy): node_z.plus(direction::y, sy);
+                for(auto &sx: stencilx)
+                {
+                    P[index++] = (sx<0)? node_y.minus(direction::x, -sx): node_y.plus(direction::x, sx);
+                }
+            }
+        }
     }
 
     //! find a potential neighbor, depending on the position of u.
     //! \param  u: node.
     //! \param P[] returned list(vector)
-    inline void boxNeighbor(std::array<Node, 25> &P, std::size_t stencil) const
+    template<std::size_t stencil, typename node_array>
+    inline void boxNeighbor_impl(node_array &P, std::integral_constant<std::size_t, 1>) const
     {
-        boxNeighbor_impl(P, stencil, std::integral_constant<std::size_t, dim>{});
+        std::array<int, 2*stencil+1> const s{Stencil_array<stencil>()};
+        Neighbor_impl(P, s);
+    }
+
+    template<std::size_t stencil, typename node_array>
+    inline void boxNeighbor_impl(node_array &P, std::integral_constant<std::size_t, 2>) const
+    {
+        std::array<int, 2*stencil+1> const s{Stencil_array<stencil>()};
+        Neighbor_impl(P, s, s);
+    }
+
+    template<std::size_t stencil, typename node_array>
+    inline void boxNeighbor_impl(node_array &P, std::integral_constant<std::size_t, 3>) const
+    {
+        std::array<int, 2*stencil+1> const s{Stencil_array<stencil>()};
+        Neighbor_impl(P, s, s, s);
+    }
+
+    template<std::size_t stencil, typename node_array>
+    inline void boxNeighbor(node_array &P) const
+    {
+        boxNeighbor_impl<stencil>(P, std::integral_constant<std::size_t, dim>{});
     }
 
     inline Node operator<<(std::size_t i) const
