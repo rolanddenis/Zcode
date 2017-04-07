@@ -35,49 +35,70 @@ struct Node: public definitions<dim, node_type>
 
     inline auto _get_dec(direction d) const
     {
-        node_type dec = ((XYZbit>>(dim*level()))<<dim);
-        return std::pair<node_type, node_type>{dec>>(static_cast<node_type>(d)+1), XMask>>static_cast<node_type>(d)};
+        node_type bit = 0;
+        node_type mask = XMask;
+        switch(d)
+        {
+            case (direction::x):
+                bit = Xbit >> dim*level(); break;
+            case (direction::y):
+                bit = Ybit >> dim*level(); mask >>= 1; break;
+            case (direction::z):
+                bit = Zbit >> dim*level(); mask >>= 2; break;
+        }
+        return std::pair<node_type, node_type>{bit, mask};
     }
     inline Node plus(direction d, std::size_t stencil=1) const
     {
         auto dummy = _get_dec(d);
-        auto dec = dummy.first;
+        auto bit = dummy.first;
         auto mask = dummy.second;
-        node_type keep = value&(maskpos - mask) + (value&levelzone);
-        node_type move = (value&mask) + stencil*dec;
-        node_type is_void = (move&(~maskpos))? voidbit: 0;
-        return {static_cast<node_type>((move&mask) + keep + is_void)};
+        node_type tmp = (maskpos - mask);
+        node_type keep = (value&tmp) + (value&levelzone);
+
+        node_type dec = 0;
+        for (std::size_t i=0; i<stencil; ++i)
+            dec = (dec|tmp) + bit;
+
+        node_type move = (value&mask) + (dec|tmp);
+        // if voidbit is True, keep it !!
+        node_type is_void = ((value&voidbit)||(move&(~maskpos)))? voidbit: 0;
+        return {static_cast<node_type>(((move&mask)&AllOnes[level()]) + keep + is_void)};
     }
 
     inline Node minus(direction d, std::size_t stencil=1) const{
         auto dummy = _get_dec(d);
-        auto dec = dummy.first;
+        auto bit = dummy.first;
         auto mask = dummy.second;
-        node_type tmp = (maskpos - mask)&AllOnes[level()];
+        node_type tmp = (maskpos - mask);
         node_type keep = value&tmp + (value&levelzone);
-        node_type move = (value&mask) + tmp - stencil*dec;
-        node_type is_void = (move&(~maskpos))? voidbit: 0;
-        return {static_cast<node_type>((move&mask) + keep + is_void)};
+
+        node_type dec = 0;
+        for (std::size_t i=0; i<stencil; ++i)
+            dec = (dec|tmp) + bit;
+
+        node_type move = (value&mask) - (dec&mask);
+        // if voidbit is True, keep it !!
+        node_type is_void = ((value&voidbit)||(move&(~maskpos)))? voidbit: 0;
+        return {static_cast<node_type>(((move&mask)&AllOnes[level()]) + keep + is_void)};
     }
 
-    // //! test if the node as max coordinate 
-    // //! \param d: the direction.
-    // inline bool is_max(direction d) const 
-    // {
-    //     // is_max: all bits set to 1.
-    //     int depth = level();
-    //     Node c = Ones[depth]>>static_cast<node_type>(d);
-    //     return (value&c.value)==c.value;
-    // }
-    // //! test if the node as min coordinate 
-    // //! \param  d: direction.
-    // inline bool is_min(direction d) const
-    // {
-    //     // is_min: all bits set to 0.
-    //     int depth = level();
-    //     Node c = Ones[depth]>>static_cast<node_type>(d);
-    //     return (value&c.value)==0;
-    // }
+    //! test if the node as max coordinate 
+    //! \param d: the direction.
+    inline bool is_max(direction d) const 
+    {
+        // is_max: all bits set to 1.
+        node_type c = Ones[level()]>>static_cast<node_type>(d);
+        return (value&c)==c;
+    }
+    //! test if the node as min coordinate 
+    //! \param  d: direction.
+    inline bool is_min(direction d) const
+    {
+        // is_min: all bits set to 0.
+        node_type c = Ones[level()]>>static_cast<node_type>(d);
+        return (value&c)==0;
+    }
 
     inline std::size_t level() const
     {
@@ -87,7 +108,7 @@ struct Node: public definitions<dim, node_type>
 
     inline void set_level(std::size_t lev)
     {
-        value = (value&maskpos)+(lev<<levelshift);
+        value = (value&maskpos) + (lev<<levelshift);
     }
 
     inline Node firstSon() const
@@ -95,10 +116,39 @@ struct Node: public definitions<dim, node_type>
         return {value+levelone};
     }
 
+    inline void boxNeighbor_impl(std::array<Node, 25> &P, int stencil, std::integral_constant<std::size_t, 2> const&) const
+    {
+        std::size_t index = 0;
+        for(int j=-stencil; j<=stencil; j++)
+        {
+            Node ny{*this};
+
+            if (j<0)
+                ny = ny.minus(direction::y, -j);
+            if (j>0)
+                ny = ny.plus(direction::y, j);
+
+            for(int i=-stencil; i<=stencil; i++)
+            {
+                Node nx{ny};
+                if (i<0)
+                    nx = ny.minus(direction::x, -i);
+                if (i>0)
+                    nx = ny.plus(direction::x, i);
+    
+                P[index++] = nx;
+            }
+        }
+        //P[4].value += voidbit;
+    }
+
     //! find a potential neighbor, depending on the position of u.
     //! \param  u: node.
     //! \param P[] returned list(vector)
-    inline void listNeighbor(Node<dim, node_type> P[]) const;
+    inline void boxNeighbor(std::array<Node, 25> &P, std::size_t stencil) const
+    {
+        boxNeighbor_impl(P, stencil, std::integral_constant<std::size_t, dim>{});
+    }
 
     inline Node operator<<(std::size_t i) const
     {
@@ -172,50 +222,27 @@ inline int indice(int i, int j)
     return 3*j+i+4;
 }
 
-// template<> 
-// inline void Node<2>::listNeighbor(Node P[]) const
+// template<typename node_type> 
+// inline void Node<2, node_type>::boxNeighbor(Node<2, node_type> P[], std::size_t stencil) const
 // {
-//     // returns possible neighbors of u, at the same level, or
-//     // a "void" Node, if no neighbor exists.
-//     int i1,i2,j1,j2;
-    
-//     is_min(direction::x)? i1=0 : i1=-1;
-//     is_max(direction::x)? i2=0 : i2=1;
-//     is_min(direction::y)? j1=0 : j1=-1;
-//     is_max(direction::y)? j2=0 : j2=1;
-
-//     for(int i=0; i<nbneighb; i++)
-//         P[i] = voidbit;
-
-//     Node<2> n;
+//     Node<2, node_type> n;
 //     int depth = level();
-//     for(int i=i1; i<=i2; i++)
-//         for(int j=j1; j<=j2; j++)
+//     std::size_t index = 0;
+//     for(int j=-stencil; j<=stencil; j++)
+//     {
+//         Node<2> n{*this};
+//         if (j<0)
+//             n = n.minus(direction::y, j);
+//         if (j>0)
+//             n = n.plus(direction::y, j);
+//         for(int i=stencil; i<=stencil; i++)
 //         {
-//             switch(i)
-//             {
-//                 case -1:
-//                 n = minus(direction::x, depth); break;
-//                 case 0:
-//                 n = *this; break;
-//                 case 1:
-//                 n = plus(direction::x, depth); break;
-//                 default:
-//                 n = 0; break;
-//             }
-//             Node<2> nr;
-//             switch(j)
-//             {
-//                 case -1:
-//                 nr = n.minus(direction::y, depth); break;
-//                 case 0:
-//                 nr = n; break;
-//                 case 1:
-//                 nr = n.plus(direction::y, depth); break;
-//                 default:
-//                 nr = 0; break;
-//             }
-//             P[indice(i, j)] = nr;
+//             if (i<0)
+//                 n = n.minus(direction::x, i);
+//             if (i>0)
+//                 n = n.plus(direction::x, i);
+//             P[index++] = n;
 //         }
+//     }
 //     P[4] = voidbit;
 // }
