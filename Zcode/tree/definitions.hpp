@@ -52,29 +52,26 @@ struct definitions
     static const node_type fifthfreebit = (firstfreebit<<4);
     static const node_type FreeBitsPart = firstfreebit+secondfreebit+thirdfreebit+
                             fourthfreebit+fifthfreebit;
-    //static const Node partWithoutFreeBits=AllSet2One<2,size>::value
-    //            - FreeBitsPart;
     static const node_type partWithoutFreeBits = ~FreeBitsPart;
     
     // digit used to mark node as void.
     static const node_type voidbit = fifthfreebit;
     //!mask for extracting all, but the void bit:
-    //static const node_type AllExceptVoidbit=AllSet2One<2,size>::value-voidbit;
     static const node_type AllExceptVoidbit= allone - voidbit;
 
-    static constexpr std::array<std::size_t, nlevels> Ones{Ones_array<nlevels>(dim, Xbit)};
-    static constexpr std::array<std::size_t, nlevels> AllOnes{Ones_array<nlevels>(dim, XYZbit)};
-    static constexpr std::array<node_type, ipow(2, dim)> TailGen{zcurve<dim, node_type>(Xbit, Ybit, Zbit)};
+    static constexpr std::array<node_type, nlevels> Ones{Ones_array<nlevels>(dim, Xbit)};
+    static constexpr std::array<node_type, nlevels> AllOnes{Ones_array<nlevels>(dim, XYZbit)};
+    static constexpr std::array<node_type, ipow(2, dim)> TailGen{zcurve<dim>(Xbit, Ybit, Zbit)};
     static const node_type XMask = Ones[nlevels-1]; 
     static const node_type YMask = XMask>>1;
     static const node_type ZMask = YMask>>1;
 };
 
 template <std::size_t dim, typename node_type>
-constexpr std::array<std::size_t, definitions<dim, node_type>::nlevels> definitions<dim, node_type>::Ones;
+constexpr std::array<node_type, definitions<dim, node_type>::nlevels> definitions<dim, node_type>::Ones;
 
 template <std::size_t dim, typename node_type>
-constexpr std::array<std::size_t, definitions<dim, node_type>::nlevels> definitions<dim, node_type>::AllOnes;
+constexpr std::array<node_type, definitions<dim, node_type>::nlevels> definitions<dim, node_type>::AllOnes;
 
 template <std::size_t dim, typename node_type>
 constexpr std::array<node_type, ipow(2, dim)> definitions<dim, node_type>::TailGen;
