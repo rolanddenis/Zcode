@@ -36,17 +36,7 @@ struct Node: public definitions<dim, node_type>
     inline auto _get_dec(direction d) const
     {
         node_type dec = ((XYZbit>>(dim*level()))<<dim);
-        node_type mask = XMask;
-        switch(d)
-        {
-            case (direction::x):
-                dec = dec >> 1; break;
-            case (direction::y):
-                dec = dec >> 2; mask >>= 1; break;
-            case (direction::z):
-                dec = dec >> 3; mask >>= 2; break;
-        }
-        return std::pair<node_type, node_type>{dec, mask};
+        return std::pair<node_type, node_type>{dec>>(static_cast<node_type>(d)+1), XMask>>static_cast<node_type>(d)};
     }
     inline Node plus(direction d, std::size_t stencil=1) const
     {
