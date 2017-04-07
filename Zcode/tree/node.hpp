@@ -26,7 +26,7 @@ struct Node: public definitions<dim, node_type>
     using definitions<dim, node_type>::Ones;
     using definitions<dim, node_type>::AllOnes;
     
-    node_type value;
+    node_type value=0;
 
     Node() = default;
     Node(const Node&) = default;
