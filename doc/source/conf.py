@@ -154,6 +154,18 @@ texinfo_documents = [
 ]
 
 
+import os, subprocess
+on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
+print(on_rtd)
+if on_rtd:
+    subprocess.call('cd ..; doxygen', shell=True)
+
+import sphinx_rtd_theme
+
+html_theme = "sphinx_rtd_theme"
+
+html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
+
 breathe_projects = { "Zcode": "../xml/" }
 
 breathe_default_project = "Zcode"

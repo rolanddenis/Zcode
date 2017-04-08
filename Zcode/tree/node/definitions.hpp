@@ -1,18 +1,20 @@
 #pragma once
 #include <cmath>
 
-#include <tree/AllSet2One.hpp>
-#include <tree/zcurve.hpp>
+#include <tree/node/AllSet2One.hpp>
+#include <tree/node/zcurve.hpp>
 
-template <std::size_t dim, typename node_type=std::size_t>
+template <std::size_t Dim, typename node_type=std::size_t>
 struct definitions
 {
-    static const int size = sizeof(node_type)*8;//!< size of Node in digits
-    static const int nbfreebits = 5;
-    static const int nblevelbits = max_level(dim, nbfreebits, size);
+    static constexpr std::size_t dim = Dim;
+    using type = node_type;
+    static const int size = sizeof(node_type)*8;//!< size of Node in digits.
+    static const int nbfreebits = 5;//!< number of freebits used for MR.
+    static const int nblevelbits = max_level(dim, nbfreebits, size);//!< number of digit for level.
     static const int nlevels = (size-nbfreebits-nblevelbits)/dim;//!< max number of tree levels.
 
-    static const int treetype = 1<<dim;//! bin (1d), quad(2d), octo (3d) trees.
+    static const int treetype = 1<<dim;//!< bin (1d), quad(2d), octo (3d) trees.
     static const int nfaces = 2*dim;//!< number of faces of each element
     static const int nbbef = 1<<(dim-1);//!< number of elements when you refine once on each face (1d: 1, 2d: 2, 3d: 4).
     static const int nbd = ipow(2, dim) << dim;//!< number max of bound. elements (1d: 2, 2d: 12, 3d: 56).
@@ -27,7 +29,7 @@ struct definitions
 
     //! amount of right shift needed to get level in the tree. 
     static const int levelshift = size-nblevelbits;
-    //!first digit marking levels:
+    //! first digit marking levels:
     static const node_type levelone = one<<levelshift;
     //! mask for extracting level:
     static const node_type levelmask = AllSet2One<dim, nblevelbits, node_type>::value; 
@@ -61,7 +63,7 @@ struct definitions
 
     static constexpr std::array<node_type, nlevels> Ones{Ones_array<nlevels>(dim, Xbit)};
     static constexpr std::array<node_type, nlevels> AllOnes{Ones_array<nlevels>(dim, XYZbit)};
-    static constexpr std::array<node_type, ipow(2, dim)> TailGen{zcurve<dim>(Xbit, Ybit, Zbit)};
+    static constexpr std::array<node_type, ipow(2, Dim)> TailGen{zcurve<Dim>(Xbit, Ybit, Zbit)};
     static const node_type XMask = Ones[nlevels-1]; 
     static const node_type YMask = XMask>>1;
     static const node_type ZMask = YMask>>1;

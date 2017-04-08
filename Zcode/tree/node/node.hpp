@@ -1,30 +1,35 @@
 #pragma once
 #include <iostream>
 
-#include <tree/definitions.hpp>
-#include <tree/direction.hpp>
+#include <tree/node/definitions.hpp>
+#include <tree/node/direction.hpp>
 
-template <std::size_t dim, typename node_type=std::size_t>
-struct Node: public definitions<dim, node_type>
+template <std::size_t Dim, typename node_type=std::size_t>
+struct Node: public definitions<Dim, node_type>
 {
-    using definitions<dim, node_type>::size;
-    using definitions<dim, node_type>::nlevels;
-    using definitions<dim, node_type>::levelshift;
-    using definitions<dim, node_type>::levelmask;
-    using definitions<dim, node_type>::levelzone;
-    using definitions<dim, node_type>::levelone;
-    using definitions<dim, node_type>::maskpos;
-    using definitions<dim, node_type>::voidbit;
-    using definitions<dim, node_type>::FreeBitsPart;
-    using definitions<dim, node_type>::Xbit;
-    using definitions<dim, node_type>::Ybit;
-    using definitions<dim, node_type>::Zbit;
-    using definitions<dim, node_type>::XYZbit;
-    using definitions<dim, node_type>::XMask;
-    using definitions<dim, node_type>::YMask;
-    using definitions<dim, node_type>::ZMask;
-    using definitions<dim, node_type>::Ones;
-    using definitions<dim, node_type>::AllOnes;
+    using definitions<Dim, node_type>::dim;    
+    using typename definitions<Dim, node_type>::type;
+    using definitions<Dim, node_type>::size;
+    using definitions<Dim, node_type>::nlevels;
+    using definitions<Dim, node_type>::levelshift;
+    using definitions<Dim, node_type>::levelmask;
+    using definitions<Dim, node_type>::levelzone;
+    using definitions<Dim, node_type>::levelone;
+    using definitions<Dim, node_type>::maskpos;
+    using definitions<Dim, node_type>::voidbit;
+    using definitions<Dim, node_type>::FreeBitsPart;
+    using definitions<Dim, node_type>::partWithoutFreeBits;
+    using definitions<Dim, node_type>::Xbit;
+    using definitions<Dim, node_type>::Ybit;
+    using definitions<Dim, node_type>::Zbit;
+    using definitions<Dim, node_type>::XYZbit;
+    using definitions<Dim, node_type>::XMask;
+    using definitions<Dim, node_type>::YMask;
+    using definitions<Dim, node_type>::ZMask;
+    using definitions<Dim, node_type>::Ones;
+    using definitions<Dim, node_type>::AllOnes;
+    using definitions<Dim, node_type>::treetype;
+    using definitions<Dim, node_type>::TailGen;
     
     node_type value=0;
 
@@ -48,6 +53,7 @@ struct Node: public definitions<dim, node_type>
         }
         return std::pair<node_type, node_type>{bit, mask};
     }
+
     inline Node plus(direction d, std::size_t stencil=1) const
     {
         auto dummy = _get_dec(d);
@@ -100,6 +106,21 @@ struct Node: public definitions<dim, node_type>
         return (value&c)==0;
     }
 
+    //! get the last level digits of a node in an int (flushed right).
+    //! \param node 
+    //! \note this can be applied to hashed and non hashed Nodes.
+    inline std::size_t lastlevel() const
+    {
+        auto l = level();
+        return (value&(XYZbit>>(dim*l)))>> (dim*(nlevels-l+1));
+    }
+
+    //! is a Node minimal (ie has minimal abscissa) in his set of Brothers?
+    inline bool is_minimal() const
+    {
+        return !lastlevel();
+    }
+
     inline std::size_t level() const
     {
         //return (value>>levelshift)&levelmask;
@@ -111,87 +132,25 @@ struct Node: public definitions<dim, node_type>
         value = (value&maskpos) + (lev<<levelshift);
     }
 
-    inline Node firstSon() const
+    // test if the node is void.
+    inline bool isVoid() const
     {
-        return {value+levelone};
+        return value&voidbit;
     }
 
-    template<std::size_t nx>
-    inline void Neighbor_impl(std::array<Node, nx> &P, 
-                              std::array<int, nx> const& stencilx) const
+    //! set the tag part of a Node
+    //! \param N pointer to the Node.
+    //! \param V tag value 
+    //! \note we do not check V.
+    inline void setTags(Node &n) const
     {
-        std::size_t index = 0;
-        for(auto &sx: stencilx)
-        {
-            P[index++] = (sx<0)? minus(direction::x, -sx): plus(direction::x, sx);
-        }
+        n.value = ((n.value)&partWithoutFreeBits) + value&FreeBitsPart;
     }
 
-    template<std::size_t nx, std::size_t ny>
-    inline void Neighbor_impl(std::array<Node, nx*ny> &P, 
-                              std::array<int, nx> const& stencilx, 
-                              std::array<int, ny> const& stencily) const
+    //! Is a node hashed?
+    inline bool isHashed() const 
     {
-        std::size_t index = 0;
-        for(auto &sy: stencily)
-        {
-            Node node_y = (sy<0)?minus(direction::y, -sy): plus(direction::y, sy);
-            for(auto &sx: stencilx)
-            {
-                P[index++] = (sx<0)? node_y.minus(direction::x, -sx): node_y.plus(direction::x, sx);
-            }
-        }
-    }
-
-    template<std::size_t nx, std::size_t ny, std::size_t nz>
-    inline void Neighbor_impl(std::array<Node, nx*ny*nz> &P, 
-                              std::array<int, nx> const& stencilx, 
-                              std::array<int, ny> const& stencily, 
-                              std::array<int, nz> const& stencilz) const
-    {
-        std::size_t index = 0;
-        for(auto &sz: stencilz)
-        {
-            Node node_z = (sz<0)?minus(direction::z, -sz): plus(direction::z, sz);
-            for(auto &sy: stencily)
-            {
-                Node node_y = (sy<0)?node_z.minus(direction::y, -sy): node_z.plus(direction::y, sy);
-                for(auto &sx: stencilx)
-                {
-                    P[index++] = (sx<0)? node_y.minus(direction::x, -sx): node_y.plus(direction::x, sx);
-                }
-            }
-        }
-    }
-
-    //! find a potential neighbor, depending on the position of u.
-    //! \param  u: node.
-    //! \param P[] returned list(vector)
-    template<std::size_t stencil, typename node_array>
-    inline void boxNeighbor_impl(node_array &P, std::integral_constant<std::size_t, 1>) const
-    {
-        std::array<int, 2*stencil+1> const s{Stencil_array<stencil>()};
-        Neighbor_impl(P, s);
-    }
-
-    template<std::size_t stencil, typename node_array>
-    inline void boxNeighbor_impl(node_array &P, std::integral_constant<std::size_t, 2>) const
-    {
-        std::array<int, 2*stencil+1> const s{Stencil_array<stencil>()};
-        Neighbor_impl(P, s, s);
-    }
-
-    template<std::size_t stencil, typename node_array>
-    inline void boxNeighbor_impl(node_array &P, std::integral_constant<std::size_t, 3>) const
-    {
-        std::array<int, 2*stencil+1> const s{Stencil_array<stencil>()};
-        Neighbor_impl(P, s, s, s);
-    }
-
-    template<std::size_t stencil, typename node_array>
-    inline void boxNeighbor(node_array &P) const
-    {
-        boxNeighbor_impl<stencil>(P, std::integral_constant<std::size_t, dim>{});
+        return value&(XYZbit>>(dim*(level()+1)));
     }
 
     inline Node operator<<(std::size_t i) const
