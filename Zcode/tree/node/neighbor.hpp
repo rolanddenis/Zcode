@@ -27,7 +27,10 @@ void neighbors(Node_type const& node,
         Node_type node_y = (sy<0)?node.minus(direction::y, -sy): node.plus(direction::y, sy);
         for(auto &sx: stencilx)
         {
-            node_array[index++] = (sx<0)? node_y.minus(direction::x, -sx): node_y.plus(direction::x, sx);
+            if (sx==0 && sy==0)
+                node_array[index++] = node.value|Node_type::voidbit;
+            else
+                node_array[index++] = (sx<0)? node_y.minus(direction::x, -sx): node_y.plus(direction::x, sx);
         }
     }
 }

@@ -10,7 +10,8 @@
 template<typename Node_type>
 inline Node_type firstSon(Node_type const& node)
 {
-    return {static_cast<typename Node_type::type>(node.value + Node_type::levelone)};
+    using type = typename Node_type::type;
+    return {static_cast<type>(node.value + Node_type::levelone)};
 }
 
 //! return the son of a Node which has the largestlest absissa (ie, the last
@@ -20,7 +21,8 @@ inline Node_type firstSon(Node_type const& node)
 template<typename Node_type>
 inline Node_type lastSon(Node_type const& node)
 {
-    Node_type output{static_cast<typename Node_type::type>(node.value + Node_type::levelone)};
+    using type = typename Node_type::type;
+    Node_type output{static_cast<type>(node.value + Node_type::levelone)};
     output.value += Node_type::XYZbit>>(Node_type::dim*output.level());
     return output;
 }  

@@ -220,32 +220,16 @@ inline Node<dim, node_type> operator-(Node<dim, node_type> const& node1, Node<di
     return res-=node2;
 }
 
-inline int indice(int i, int j)
+template <typename node_type>
+inline bool operator==(node_type const& node1, node_type const& node2)
 {
-    return 3*j+i+4;
+    return (node1.value&node_type::partWithoutFreeBits)==(node2.value&node_type::partWithoutFreeBits);
 }
 
-// template<typename node_type> 
-// inline void Node<2, node_type>::boxNeighbor(Node<2, node_type> P[], std::size_t stencil) const
-// {
-//     Node<2, node_type> n;
-//     int depth = level();
-//     std::size_t index = 0;
-//     for(int j=-stencil; j<=stencil; j++)
-//     {
-//         Node<2> n{*this};
-//         if (j<0)
-//             n = n.minus(direction::y, j);
-//         if (j>0)
-//             n = n.plus(direction::y, j);
-//         for(int i=stencil; i<=stencil; i++)
-//         {
-//             if (i<0)
-//                 n = n.minus(direction::x, i);
-//             if (i>0)
-//                 n = n.plus(direction::x, i);
-//             P[index++] = n;
-//         }
-//     }
-//     P[4] = voidbit;
-// }
+template <typename node_type>
+inline node_type operator&(node_type const& node1, node_type const& node2)
+{
+    using type = typename node_type::type;
+    return {static_cast<type>(node1.value&node2.value)};
+}
+
