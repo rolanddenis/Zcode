@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <algorithm>
+#include <fstream>
 
 #include <tree/node/node.hpp>
 
@@ -37,6 +38,7 @@ struct slot: private std::vector<Node<dim, value_type>>
     using parent::cend;
     using parent::size;
     using parent::capacity;
+    using parent::shrink_to_fit;
 
     static const value_type FreeBitsPart = node_type::FreeBitsPart;
     static const value_type voidbit = node_type::voidbit;
@@ -84,7 +86,8 @@ public:
 
     //! put a vector of Node's at the end.
     //! \param x vector of  *hashed* nodes (not checked).
-    inline void put(std::vector<node_type> x)
+    template<typename container>
+    inline void put(container const& x)
     {
         insert(end(), x.cbegin(), x.cend());
     }
@@ -241,7 +244,7 @@ public:
     {
         std::vector<slot> slarray(nc);
 
-        std::sort(begin(), end(), [&](auto &n1, auto &n2){return (n1.value&maskpos)<(n2.value&maskpos);});
+        sort();
 
         std::size_t sizec = size()/nc;
         for(std::size_t i=0; i<nc-1; ++i)
@@ -257,21 +260,150 @@ public:
         return slarray;
     }
 
-  //! cut this slot in 2 slots, at position pos, and then shrink it.
-  //! the returned slot is the first part containing v[0,pos[
-  //! \param pos 
-  //! \param s2new value for s2 of the *new* slot, and s1 of this slot.
-  //! \note we do not check that pos is correct, except if DEBUG is set.
-  //! \note for s2new: position part only; tested only if DEBUG set.
-  inline auto cutBefore(std::size_t pos, node_type s2new)
-  {
-      slot newslot(s1, s2new, capacity());
-      newslot.insert(newslot.begin(), begin(), begin()+pos);
+    //! cut this slot in 2 slots, at position pos, and then shrink it.
+    //! the returned slot is the first part containing v[0,pos[
+    //! \param pos 
+    //! \param s2new value for s2 of the *new* slot, and s1 of this slot.
+    //! \note we do not check that pos is correct, except if DEBUG is set.
+    //! \note for s2new: position part only; tested only if DEBUG set.
+    inline auto cutBefore(std::size_t pos, node_type s2new)
+    {
+        slot newslot(s1, s2new, capacity());
+        newslot.insert(newslot.begin(), begin(), begin()+pos);
 
-      erase(begin(), begin()+pos);
-      s1 = s2new;
-      return newslot;
-  }
+        erase(begin(), begin()+pos);
+        s1 = s2new;
+        return newslot;
+    }
+
+    //! fusion this slot with slot sl
+    //! \param sl  slot.
+    inline void fusion(const slot& sl)
+    {
+        s1 = std::min(s1, sl.s1);
+        s2 = std::max(s2, sl.s2);
+        put(sl);
+    }
+
+    //! sort by hash function.
+    inline void sort()
+    {
+        std::sort(begin(), end(), [&](auto &n1, auto &n2){return (n1.value&maskpos)<(n2.value&maskpos);});
+    }
+
+    //! reallocate to reduce size;
+    //! \param lim we reduce size if allocsize/size>= lim
+    //! \note return True iff slot is reduced.
+    inline bool cutdown(std::size_t lim=2)
+    {
+        bool ret=false;
+        if(size()!=0 && capacity()/size()>=lim)
+        {
+            shrink_to_fit();
+            reserve(2*size);
+            ret = true;
+        }
+        return ret;
+    }
+
+    //! suppress all bits used to mark something (except voidbit).
+    inline void forgetFreeBits()
+    {
+        std::for_each(begin(), end(), [&](auto &n){n&=(~FreeBitsPart);});
+    }
+
+    //! suppress ex-aequo.
+    //! \note slot must be sorted (tested only if DEBUG is set).
+    inline void uniq()
+    {
+        auto last = std::unique(begin(), end());
+        resize(std::distance(begin(), last));
+    }
+    
+    //!test if all nodes have their abscissa between s1 and s2.
+    //!\param throwexept throw an exception if true.
+    inline bool testWellFormed(bool throwexept=true) const
+    {
+        auto index = std::find_if(cbegin(), cend(), [&](auto &n){return (n<s1 || n >=s2);});
+        return (index == end())? true: false;
+    }
+
+    //! look for ex-aequo
+    inline bool exaequo() const
+    {
+        auto index = std::adjacent_find(begin(), end());
+        return (index == end())? false: true;
+    }
+
+    inline int Startrank() const 
+    {
+        return startrank;
+    }
+    
+    //! set startrank
+    //! \param r
+    inline void setStartrank(std::size_t r) 
+    {
+        startrank = r;
+    }
+
+    //! return slotrank.
+    inline int Slotrank() const 
+    {
+        return slotrank;
+    }
+    
+    //! set the slot rank
+    //! \param r
+    inline void setSlotrank(std::size_t r)
+    {
+        slotrank = r;
+    }
+
+    //! Write slot to a file, already open.
+    //! _param f the file.
+    void dump(std::ofstream& f)
+    {
+        f << size() << "\n";
+        f << s2 << "\n"; 
+        f << s1<< "\n";
+        f << startrank << "\n";
+        for_each(cbegin(), cend(), [&](auto &n){f << n << "\n";});
+    }
+
+    //! restore a slot from a dump.
+    //! \param file the file to restore from.
+    void restore(std::ifstream& f)
+    {
+        std::size_t ssize; 
+        node_type s1,s2; 
+        std::size_t startrank;
+        
+        f >> ssize;
+        f >> s2; 
+        f >> s1; 
+        f >> startrank; 
+        slot(s1, s2, ssize);
+        for(std::size_t j=0; j<ssize; j++)
+        {
+            node_type N;
+            f >> N;
+            put(N);
+        }
+    }
     
 };
 
+template<std::size_t dim, typename value_type>
+std::ostream& operator<<(std::ostream& os, const slot<dim, value_type>& sl)
+{
+    os << "slot\n";
+    os << "s1: " << sl.s1 << "\n";
+    os << "s2: " << sl.s2 << "\n";
+    os << "size: " << sl.size() << "\n";
+    os << "capacity: " << sl.capacity() << "\n";
+    os << "startrank: " << sl.Startrank() << "\n";
+    os << "slotrank: " << sl.Slotrank() << "\n";
+    os << "hasvoidNodes: " << sl.hasvoidNodes() << "\n";
+    return os;
+}

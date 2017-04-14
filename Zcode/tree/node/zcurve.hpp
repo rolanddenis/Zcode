@@ -1,5 +1,5 @@
 #pragma once
-#include <tree/node/AllSet2One.hpp>
+#include <tree/node/util.hpp>
 
 template<typename node_type>
 constexpr std::array<node_type, 2> zcurve_impl(node_type Xbit, node_type Ybit, node_type Zbit, std::integral_constant<int, 1> const&)

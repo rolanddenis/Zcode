@@ -4,6 +4,7 @@
 #include <tree/node/node.hpp>
 #include <tree/node/neighbor.hpp>
 #include <tree/slot/slot.hpp>
+#include <tree/slot/cache.hpp>
 
 int main()
 {
@@ -59,6 +60,12 @@ int main()
     for(auto &ss: news[1])
         std::cout << ss << "\n";
 
+    nnews.fusion(news[1]);
+    std::cout << "\n**********************\n";
+    std::cout << "s1: " << nnews.s1 << "\n";
+    std::cout << "s2: " << nnews.s2 << "\n";
+    for(auto &ss: nnews)
+        std::cout << ss << "\n";
     // s.insert(s.end(), {3, 2, 1});
     // s.slotMark = 16;
     // std::cout << s.slotMark << "\n";

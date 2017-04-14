@@ -1,7 +1,7 @@
 #pragma once
 #include <cmath>
 
-#include <tree/node/AllSet2One.hpp>
+#include <tree/node/util.hpp>
 #include <tree/node/zcurve.hpp>
 
 template <std::size_t Dim, typename node_type=std::size_t>

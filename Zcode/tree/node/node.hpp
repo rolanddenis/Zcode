@@ -1,5 +1,8 @@
 #pragma once
+#include <algorithm>
 #include <iostream>
+#include <string>
+#include <cassert>
 
 #include <tree/node/definitions.hpp>
 #include <tree/node/direction.hpp>
@@ -37,6 +40,13 @@ struct Node: public definitions<Dim, node_type>
     Node(const Node&) = default;
 
     Node(node_type i):value{i}{}
+
+    Node(std::string const &bin_repr)
+    {
+        assert(bin_repr.size()<=size);
+        std::cout << bin_repr << "\n";
+        value = std::stoi(bin_repr.data(), 0, 2);
+    }
 
     inline auto _get_dec(direction d) const
     {
@@ -147,6 +157,21 @@ struct Node: public definitions<Dim, node_type>
         n.value = ((n.value)&partWithoutFreeBits) + value&FreeBitsPart;
     }
 
+    //! return the hash code for nodes.
+    //! \param x Node
+    //! \note we do not test if x is already hashed, except if DEBUG is set.
+    inline Node hash() const
+    {
+        return value + (XYZbit>>(dim*(level()+1)));
+    }
+    //! For a given hasehd representation of a Node, we return the non
+    //! hashed representation.
+    //! \param x Node
+    inline Node unhash() const
+    {
+        return value - (XYZbit>>(dim*(level()+1)));
+    }
+
     //! Is a node hashed?
     inline bool isHashed() const 
     {
@@ -180,31 +205,39 @@ struct Node: public definitions<Dim, node_type>
         return value&node.value;
     }
 
-    friend std::ostream& operator<<(std::ostream &os, const Node &node)
-    {
-        std::string s;
-
-        Node<dim, node_type> IntOne{1};//!<! 1! 
-
-        for(int i=size-1;i>=0;i--)
-        {
-            if(node& (IntOne<<i))
-                s+='1';
-            else
-                s+='0';
-            if(i==dim*nlevels)
-                s+="|";
-            //else if(i==levelshift ||i==size-1)
-            else if(i==levelshift)
-                s+='.';
-            else if(i%dim==0 && i>0 && i<dim*nlevels)
-                s+='.';
-        }
-
-        os << s;
-        return os;
-    }
 };
+
+template <std::size_t dim, typename value_type=std::size_t>
+std::ostream& operator<<(std::ostream &os, const Node<dim, value_type> &node)
+{
+    std::string s;
+
+    using node_type = Node<dim, value_type>;
+
+    const std::size_t size = node_type::size;
+    const std::size_t nlevels = node_type::nlevels;
+    const std::size_t levelshift = node_type::levelshift;
+
+    node_type IntOne{1};//!<! 1! 
+
+    for(int i=size-1;i>=0;i--)
+    {
+        if(node&(IntOne<<i))
+            s+='1';
+        else
+            s+='0';
+        if(i==dim*nlevels)
+            s+="|";
+        //else if(i==levelshift ||i==size-1)
+        else if(i==levelshift)
+            s+='.';
+        else if(i%dim==0 && i>0 && i<dim*nlevels)
+            s+='.';
+    }
+
+    os << s;
+    return os;
+}
 
 template <std::size_t dim, typename node_type>
 inline Node<dim, node_type> operator+(Node<dim, node_type> const& node1, Node<dim, node_type> const& node2)
@@ -233,3 +266,26 @@ inline node_type operator&(node_type const& node1, node_type const& node2)
     return {static_cast<type>(node1.value&node2.value)};
 }
 
+template <typename node_type>
+inline bool operator<(node_type const& node1, node_type const& node2)
+{
+    return (node1.value<node2.value);
+}
+
+template <typename node_type>
+inline bool operator<=(node_type const& node1, node_type const& node2)
+{
+    return (node1.value<=node2.value);
+}
+
+template <typename node_type>
+inline bool operator>(node_type const& node1, node_type const& node2)
+{
+    return (node1.value>node2.value);
+}
+
+template <typename node_type>
+inline bool operator>=(node_type const& node1, node_type const& node2)
+{
+    return (node1.value>=node2.value);
+}
