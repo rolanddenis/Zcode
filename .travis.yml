@@ -69,7 +69,7 @@ before_install:
         export CXX=clang++ CC=clang;
       fi
 install:
-    - cmake -DBUILD_TESTS=ON .
+    - cmake -DDOWNLOAD_GTEST=ON .
     - make -j2 test_zcode
     - cd test
 script:
