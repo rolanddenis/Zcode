@@ -141,7 +141,7 @@ TYPED_TEST(SlotTest, unsetMark)
     using node_type = Node<dim, value_type>;
 
     slot<dim, value_type> slot{10};
-    slot.setMark(node_type::voidbit + node_type::voidbit>>1);
+    slot.setMark(node_type::voidbit + (node_type::voidbit>>1));
     node_type n{node_type::voidbit>>1};
     slot.unsetMark(n);
     EXPECT_EQ( slot.getMark(), node_type::voidbit>>slot.decal );
@@ -216,7 +216,7 @@ TYPED_TEST(SlotTest, compressany)
             nodes[i] += node_type::voidbit>>1;
     }
     slot.put(nodes);
-    slot.setMark(node_type::voidbit + node_type::voidbit>>1);
+    slot.setMark(node_type::voidbit + (node_type::voidbit>>1));
     slot.compressany();
     EXPECT_EQ( slot.size(), 0 );
 }
@@ -238,7 +238,7 @@ TYPED_TEST(SlotTest, compresswithnodes_1)
             nodes[i] += node_type::voidbit>>1;
     }
     slot.put(nodes);
-    slot.setMark(node_type::voidbit + node_type::voidbit>>1);
+    slot.setMark(node_type::voidbit + (node_type::voidbit>>1));
     node_type n1{node_type::voidbit}, n2{node_type::voidbit>>1};
     slot.compress(n1, n2);
     EXPECT_EQ( slot.size(), 0 );
@@ -261,7 +261,7 @@ TYPED_TEST(SlotTest, compresswithnodes_2)
             nodes[i] += node_type::voidbit>>1;
     }
     slot.put(nodes);
-    slot.setMark(node_type::voidbit + node_type::voidbit>>1);
+    slot.setMark(node_type::voidbit + (node_type::voidbit>>1));
     node_type n1{node_type::voidbit}, n2{node_type::voidbit>>2};
     slot.compress(n1, n2);
     EXPECT_EQ( slot.size(), 5 );
