@@ -38,6 +38,7 @@ struct Node: public definitions<Dim, node_type>
 
     Node() = default;
     Node(const Node&) = default;
+    //Node(Node&& node) = default;
 
     Node(node_type i):value{i}{}
 
@@ -189,6 +190,12 @@ struct Node: public definitions<Dim, node_type>
         return *this;
     }
 
+    // inline Node& operator=(Node<dim, node_type> && node)
+    // {
+    //     value = std::move(node.value);
+    //     return *this;
+    // }
+
     inline std::size_t operator[](std::size_t i) const
     {
         return (value>>i)&1;
@@ -239,19 +246,19 @@ std::ostream& operator<<(std::ostream &os, const Node<dim, value_type> &node)
     return os;
 }
 
-template <std::size_t dim, typename node_type>
-inline Node<dim, node_type> operator+(Node<dim, node_type> const& node1, Node<dim, node_type> const& node2)
-{
-    Node<dim, node_type> res{node1};
-    return res+=node2;
-}
+// template <std::size_t dim, typename node_type>
+// inline Node<dim, node_type> operator+(Node<dim, node_type> const& node1, Node<dim, node_type> const& node2)
+// {
+//     Node<dim, node_type> res{node1};
+//     return res+=node2;
+// }
 
-template <std::size_t dim, typename node_type>
-inline Node<dim, node_type> operator-(Node<dim, node_type> const& node1, Node<dim, node_type> const& node2)
-{
-    Node<dim, node_type> res{node1};
-    return res-=node2;
-}
+// template <std::size_t dim, typename node_type>
+// inline Node<dim, node_type> operator-(Node<dim, node_type> const& node1, Node<dim, node_type> const& node2)
+// {
+//     Node<dim, node_type> res{node1};
+//     return res-=node2;
+// }
 
 template <typename node_type>
 inline bool operator==(node_type const& node1, node_type const& node2)

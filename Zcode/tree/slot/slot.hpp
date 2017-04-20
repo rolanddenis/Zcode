@@ -45,7 +45,7 @@ struct slot: private std::vector<Node<dim, value_type>>
     static const value_type maskpos = node_type::maskpos;
     static const value_type decal = dim*node_type::nlevels;
 
-    node_type s1, s2;
+    node_type s1{0}, s2{node_type::AllOnes[node_type::nlevels-1]};
 
 private:
     std::size_t slotrank;//!<rank in a collection of slots.
@@ -65,6 +65,12 @@ public:
     slot(std::size_t size)
     {
         reserve(size);
+    }
+
+    inline void copyInArray(node_type* array) const
+    {
+        for(std::size_t i=0; i<size(); i++)
+            array[i] = *this[i]; 
     }
 
     //! find a Node.
@@ -140,7 +146,8 @@ public:
     // How is the slot marked?
     inline node_type howMasked() const
     {
-        return {slotMark<<decal};
+        node_type n{slotMark};
+        return n << decal;
     }
 
     //! mark the slot with some value.
@@ -173,13 +180,6 @@ public:
         }
     }
 
-    //! count Nodes such that Node&N == N.
-    //! \param N test value.
-    inline auto countAndEq(node_type N) const
-    {
-        return std::count_if(begin(), end(), [&](auto const& n){return (n.value&N.value)==N.value;});
-    }
-
     //! suppress a given mark
     //! \param N the mark
     //! \note throw an exception if not marked "mark".
@@ -194,7 +194,7 @@ public:
     //! \param mark for the test.
     bool markedOther(node_type mark)
     {
-        node_type N{FreeBitsPart-mark};
+        node_type N{static_cast<value_type>(FreeBitsPart-mark.value)};
         const unsigned char m = (N.value&FreeBitsPart)>>decal;
         return slotMark&m;
     }
@@ -202,7 +202,7 @@ public:
     //! does this slot contains void Nodes ?
     inline bool hasvoidNodes() const 
     {
-        return slotMark&voidbit;
+        return slotMark&(voidbit>>decal);
     }
 
     //! mark the slot as containing void Nodes.
@@ -300,7 +300,7 @@ public:
         if(size()!=0 && capacity()/size()>=lim)
         {
             shrink_to_fit();
-            reserve(2*size);
+            reserve(2*size());
             ret = true;
         }
         return ret;
@@ -309,7 +309,7 @@ public:
     //! suppress all bits used to mark something (except voidbit).
     inline void forgetFreeBits()
     {
-        std::for_each(begin(), end(), [&](auto &n){n&=(~FreeBitsPart);});
+        std::for_each(begin(), end(), [&](auto &n){n.value&=(~FreeBitsPart);});
     }
 
     //! suppress ex-aequo.
@@ -365,10 +365,10 @@ public:
     void dump(std::ofstream& f)
     {
         f << size() << "\n";
-        f << s2 << "\n"; 
-        f << s1<< "\n";
+        f << s2.value << "\n"; 
+        f << s1.value << "\n";
         f << startrank << "\n";
-        for_each(cbegin(), cend(), [&](auto &n){f << n << "\n";});
+        for_each(cbegin(), cend(), [&](auto &n){f << n.value << "\n";});
     }
 
     //! restore a slot from a dump.
@@ -376,19 +376,19 @@ public:
     void restore(std::ifstream& f)
     {
         std::size_t ssize; 
-        node_type s1,s2; 
-        std::size_t startrank;
-        
+        value_type ss1;
+        value_type ss2;
         f >> ssize;
-        f >> s2; 
-        f >> s1; 
-        f >> startrank; 
-        slot(s1, s2, ssize);
+        f >> ss2; 
+        f >> ss1; 
+        f >> startrank;
+        s1 = ss1; 
+        s2 = ss2; 
         for(std::size_t j=0; j<ssize; j++)
         {
-            node_type N;
+            value_type N;
             f >> N;
-            put(N);
+            put(node_type{N});
         }
     }
     

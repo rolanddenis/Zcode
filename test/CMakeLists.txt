@@ -36,6 +36,7 @@ include_directories(${GTEST_INCLUDE_DIRS})
 set(ZCODE_TESTS
     main.cpp
     test_node.cpp
+    test_slot.cpp
 )
 
 set(ZCODE_TARGET test_zcode)

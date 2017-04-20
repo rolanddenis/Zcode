@@ -7,11 +7,12 @@
 //! one in the son's brotherhood.
 //! \param u Node.
 //! \note we return a non hashed Node.
-template<typename Node_type>
-inline Node_type firstSon(Node_type const& node)
+template<std::size_t dim, typename value_type>
+inline Node<dim, value_type> firstSon(Node<dim, value_type> const& node)
 {
-    using type = typename Node_type::type;
-    return {static_cast<type>(node.value + Node_type::levelone)};
+    using node_type = Node<dim, value_type>;
+    //return {static_cast<type>(node.value + Node_type::levelone)};
+    return node + node_type::levelone;
 }
 
 //! return the son of a Node which has the largestlest absissa (ie, the last
@@ -23,7 +24,7 @@ inline Node_type lastSon(Node_type const& node)
 {
     using type = typename Node_type::type;
     Node_type output{static_cast<type>(node.value + Node_type::levelone)};
-    output.value += Node_type::XYZbit>>(Node_type::dim*output.level());
+    output += Node_type::XYZbit>>(Node_type::dim*output.level());
     return output;
 }  
 
