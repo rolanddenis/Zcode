@@ -42,6 +42,7 @@ matrix:
       osx_image: xcode8.3
       compiler: clang
 before_install:
+    - sudo apt-get install libtbb-dev
     - |
       # Configure build variables
       if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
