@@ -261,7 +261,7 @@ std::ostream& operator<<(std::ostream &os, const Node<dim, value_type> &node)
 // }
 
 template <typename node_type>
-inline bool operator==(node_type const& node1, node_type const& node2) noexcept
+inline bool operator==(node_type const& node1, node_type const& node2)
 {
     return (node1.value&node_type::partWithoutFreeBits)==(node2.value&node_type::partWithoutFreeBits);
 }
