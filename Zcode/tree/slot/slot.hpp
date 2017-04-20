@@ -55,6 +55,7 @@ private:
 
 public:
     slot() = default;
+    // remark: the default copy constructor doesn't set the same capacity of the copied slot
     slot(const slot&) = default;
 
     slot(node_type _s1, node_type _s2, std::size_t size):s1{_s1}, s2{_s2}

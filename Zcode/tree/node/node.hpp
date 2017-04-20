@@ -274,6 +274,13 @@ inline node_type operator&(node_type const& node1, node_type const& node2)
 }
 
 template <typename node_type>
+inline node_type operator&(node_type const& node, typename node_type::type const& value)
+{
+    using type = typename node_type::type;
+    return {static_cast<type>(node.value&value)};
+}
+
+template <typename node_type>
 inline bool operator<(node_type const& node1, node_type const& node2)
 {
     return (node1.value<node2.value);
