@@ -42,17 +42,20 @@ matrix:
       osx_image: xcode8.3
       compiler: clang
 before_install:
-    - sudo apt-get install libtbb-dev
     - |
       # Configure build variables
       if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
         if [[ "$COMPILER" == "gcc" ]]; then
+          sudo apt-get install libtbb-dev;
           export CXX=g++-$GCC CC=gcc-$GCC;
         fi
         if [[ "$COMPILER" == "clang" ]]; then
+          sudo apt-get install libtbb-dev;
           export CXX=clang++-$CLANG CC=clang-$CLANG;
         fi
       elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+        brew update;
+        brew install tbb;
         export CXX=clang++ CC=clang;
       fi
 install:
