@@ -60,7 +60,7 @@ before_install:
       fi
 install:
     - cmake -DDOWNLOAD_GTEST=ON .
-    - make -j2 test_zcode
+    - make VERBOSE=1 -j2 test_zcode
     - cd test
 script:
 - ./test_zcode
