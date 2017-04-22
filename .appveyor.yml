@@ -29,7 +29,7 @@ before_build:
 
 
 build_script:
-  - cmake -G "NMake Makefiles" -DDOWNLOAD_GTEST=ON .
+  - cmake -G "NMake Makefiles" -DCMAKE_CXX_COMPILER=clang-cl -DCMAKE_CXX_FLAGS="-fms-compatibility-version=19" -DDOWNLOAD_GTEST=ON .
   - nmake test_zcode
   - cd test
   - .\test_zcode
