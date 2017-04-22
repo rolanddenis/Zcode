@@ -1,5 +1,9 @@
 os: Visual Studio 2015
 
+configuration:
+#  - Release
+- Debug
+
 install:
   ############################################################################
   # All external dependencies are installed in C:\projects\deps
@@ -39,7 +43,7 @@ before_build:
 
 
 build_script:
-  - cmake -G "NMake Makefiles" -DCMAKE_CXX_COMPILER=clang-cl -DCMAKE_CXX_FLAGS="-fms-compatibility-version=19" -DDOWNLOAD_GTEST=ON .
+  - cmake -G "NMake Makefiles" -DCMAKE_CXX_COMPILER=clang-cl -DDOWNLOAD_GTEST=ON .
   - nmake test_zcode
   - cd test
   - .\test_zcode
