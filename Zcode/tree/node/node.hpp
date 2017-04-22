@@ -246,60 +246,45 @@ std::ostream& operator<<(std::ostream &os, const Node<dim, value_type> &node)
     return os;
 }
 
-// template <std::size_t dim, typename node_type>
-// inline Node<dim, node_type> operator+(Node<dim, node_type> const& node1, Node<dim, node_type> const& node2)
-// {
-//     Node<dim, node_type> res{node1};
-//     return res+=node2;
-// }
-
-// template <std::size_t dim, typename node_type>
-// inline Node<dim, node_type> operator-(Node<dim, node_type> const& node1, Node<dim, node_type> const& node2)
-// {
-//     Node<dim, node_type> res{node1};
-//     return res-=node2;
-// }
-
-template <typename node_type>
-inline bool operator==(node_type const& node1, node_type const& node2)
+template <std::size_t dim, typename value_type>
+inline bool operator==(Node<dim, value_type> const& node1, Node<dim, value_type> const& node2)
 {
+    using node_type = Node<dim, value_type>;
     return (node1.value&node_type::partWithoutFreeBits)==(node2.value&node_type::partWithoutFreeBits);
 }
 
-template <typename node_type>
-inline node_type operator&(node_type const& node1, node_type const& node2)
+template <std::size_t dim, typename value_type>
+inline Node<dim, value_type> operator&(Node<dim, value_type> const& node1, Node<dim, value_type> const& node2)
 {
-    using type = typename node_type::type;
-    return {static_cast<type>(node1.value&node2.value)};
+    return {static_cast<value_type>(node1.value&node2.value)};
 }
 
-template <typename node_type>
-inline node_type operator&(node_type const& node, typename node_type::type const& value)
+template <std::size_t dim, typename value_type>
+inline Node<dim, value_type> operator&(Node<dim, value_type> const& node, value_type const& value)
 {
-    using type = typename node_type::type;
-    return {static_cast<type>(node.value&value)};
+    return {static_cast<value_type>(node.value&value)};
 }
 
-template <typename node_type>
-inline bool operator<(node_type const& node1, node_type const& node2)
+template <std::size_t dim, typename value_type>
+inline bool operator<(Node<dim, value_type> const& node1, Node<dim, value_type> const& node2)
 {
     return (node1.value<node2.value);
 }
 
-template <typename node_type>
-inline bool operator<=(node_type const& node1, node_type const& node2)
+template <std::size_t dim, typename value_type>
+inline bool operator<=(Node<dim, value_type> const& node1, Node<dim, value_type> const& node2)
 {
     return (node1.value<=node2.value);
 }
 
-template <typename node_type>
-inline bool operator>(node_type const& node1, node_type const& node2)
+template <std::size_t dim, typename value_type>
+inline bool operator>(Node<dim, value_type> const& node1, Node<dim, value_type> const& node2)
 {
     return (node1.value>node2.value);
 }
 
-template <typename node_type>
-inline bool operator>=(node_type const& node1, node_type const& node2)
+template <std::size_t dim, typename value_type>
+inline bool operator>=(Node<dim, value_type> const& node1, Node<dim, value_type> const& node2)
 {
     return (node1.value>=node2.value);
 }
