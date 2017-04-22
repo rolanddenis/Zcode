@@ -25,7 +25,7 @@ install:
   - 7z x tbb.zip -oC:\projects\deps > nul
   - move C:\projects\deps\tbb2017* C:\projects\deps\tbb # Move to a version-agnostic directory
   - dir C:\projects\deps
-  - call "C:\projects\deps\tbb\bin\tbbvars.bat"
+  - call "C:\projects\deps\tbb\bin\tbbvars.bat" intel64 vs2015
 
   ############################################################################
   # Setup the path to Clang-cl
