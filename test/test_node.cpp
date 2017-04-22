@@ -100,23 +100,23 @@ TYPED_TEST(NodeTest, hash)
     EXPECT_EQ( node_unhash.isHashed(), false );
 }
 
-TYPED_TEST(NodeTest, brothers)
-{
-    auto const dim = TestFixture::dim;
-    using value_type = typename TestFixture::value_type;
-    using node_type = Node<dim, value_type>;
+// TYPED_TEST(NodeTest, brothers)
+// {
+//     auto const dim = TestFixture::dim;
+//     using value_type = typename TestFixture::value_type;
+//     using node_type = Node<dim, value_type>;
 
-    for(std::size_t level=0; level<4; ++level)
-    {
-        node_type node{};
-        std::array<node_type, ipow(2, dim)> b;
-        node.set_level(level);
-        brothers(node, b);
-        auto btrue = TestFixture::build_brothers(level);
-        for (std::size_t i = 0; i<btrue.size(); ++i)
-        {
-            b[i].set_level(0);
-            EXPECT_EQ( b[i].value, btrue[i] );
-        }
-    }
-}
+//     for(std::size_t level=0; level<4; ++level)
+//     {
+//         node_type node{};
+//         std::array<node_type, ipow(2, dim)> b;
+//         node.set_level(level);
+//         brothers(node, b);
+//         auto btrue = TestFixture::build_brothers(level);
+//         for (std::size_t i = 0; i<btrue.size(); ++i)
+//         {
+//             b[i].set_level(0);
+//             EXPECT_EQ( b[i].value, btrue[i] );
+//         }
+//     }
+// }
