@@ -23,7 +23,7 @@ install:
   - set TBB_URL="https://github.com/01org/tbb/releases/download/2017_U5/tbb2017_20170226oss_win.zip"
   - appveyor DownloadFile %TBB_URL% -FileName tbb.zip
   - 7z x tbb.zip -oC:\projects\deps > nul
-  - move C:\projects\deps\tbb* C:\projects\deps\tbb # Move to a version-agnostic directory
+  - move C:\projects\deps\tbb2017* C:\projects\deps\tbb # Move to a version-agnostic directory
   - dir C:\projects\deps
   - call "C:\projects\deps\tbb\bin\tbbvars.bat"
 
