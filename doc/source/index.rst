@@ -15,6 +15,8 @@ Welcome to Zcode's documentation!
    :maxdepth: 2
 
    api/node
+   api/slot
+   api/slotCollection
 
 
 Indices and tables
