@@ -1,24 +1,14 @@
 include(CheckCXXCompilerFlag)
 
-if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Intel")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -Wunused-parameter -Wextra -Wreorder -Wconversion")
-    CHECK_CXX_COMPILER_FLAG("-std=c++14" HAS_CPP14_FLAG)
-
-    if (HAS_CPP14_FLAG)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
-    else()
-        message(FATAL_ERROR "Unsupported compiler -- xtensor requires C++14 support!")
+if (MSVC AND ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
+    check_cxx_compiler_flag(-std=c++1y BOOST_HANA_HAS_STD_CPP1Y)
+    if (BOOST_HANA_HAS_STD_CPP1Y)
+        target_add_compile_options(hana INTERFACE -std=c++1y)
     endif()
-endif()
-
-if(MSVC)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc /MP /bigobj")
-    set(CMAKE_EXE_LINKER_FLAGS /MANIFEST:NO)
-    foreach(flag_var
-            CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
-            CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
-        string(REPLACE "/MD" "-MT" ${flag_var} "${${flag_var}}")
-    endforeach()
+else()
+    # TODO: Set these as interface properties when supported
+    set(CMAKE_CXX_STANDARD 14)
+    set(CMAKE_CXX_STANDARD_REQUIRED YES)
 endif()
 
 if(DOWNLOAD_GTEST OR GTEST_SRC_DIR)
