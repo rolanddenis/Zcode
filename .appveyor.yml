@@ -1,3 +1,5 @@
+build: false
+
 os: Visual Studio 2015
 
 install:

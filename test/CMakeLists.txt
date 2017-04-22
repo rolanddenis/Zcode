@@ -48,7 +48,7 @@ include_directories(${ZCODE_INCLUDE_DIR})
 include_directories(${GTEST_INCLUDE_DIRS})
 
 set(ZCODE_TESTS
-    main.cpp
+    #main.cpp
     test_node.cpp
     #test_slot.cpp
     #test_slotCollection.cpp
