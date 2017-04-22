@@ -1,15 +1,35 @@
-os: Visual Studio 2017
-
-platform:
-  - x64
-
-init:
-  - CALL "C:\Program Files (x86)\Microsoft Visual Studio 17.0\VC\vcvarsall.bat" amd64
+os: Visual Studio 2015 Update 2
 
 install:
+  ############################################################################
+  # All external dependencies are installed in C:\projects\deps
+  ############################################################################
+  - mkdir C:\projects\deps
+  - cd C:\projects\deps
+
+  ############################################################################
+  # Install a recent CMake
+  ############################################################################
+  - set CMAKE_URL="https://cmake.org/files/v3.7/cmake-3.7.2-win64-x64.zip"
+  - appveyor DownloadFile %CMAKE_URL% -FileName cmake.zip
+  - 7z x cmake.zip -oC:\projects\deps > nul
+  - move C:\projects\deps\cmake-* C:\projects\deps\cmake # Move to a version-agnostic directory
+  - set PATH=C:\projects\deps\cmake\bin;%PATH%
+  - cmake --version
+
+  ############################################################################
+  # Setup the path to Clang-cl
+  ############################################################################
+  - set PATH="C:\Program Files\LLVM\bin";%PATH%
+  - clang-cl -v
+
+before_build:
+  - call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd64
+  - cd C:\projects\Zcode
+
+
+build_script:
   - cmake -G "NMake Makefiles" -DDOWNLOAD_GTEST=ON .
   - nmake test_zcode
   - cd test
-
-build_script:
-- .\test_zcode
+  - .\test_zcode
