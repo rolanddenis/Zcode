@@ -7,7 +7,7 @@ if (MSVC AND ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
              CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
              CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
         string(REPLACE "/MD" "-MT" ${flag_var} "${${flag_var}}")
-    endif()
+    endforeach()
 else()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 endif()
