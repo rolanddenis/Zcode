@@ -23,7 +23,7 @@ install:
   - conda update -q conda
   - conda info -a
   - conda install gtest cmake tbb -c conda-forge
-  - cmake -G "NMake Makefiles" -DBUILD_TESTS=ON .
+  - cmake -G "NMake Makefiles" -D CMAKE_INSTALL_PREFIX=%MINICONDA%\\LIBRARY -DBUILD_TESTS=ON .
   - nmake test_zcode
   - cd test
 
