@@ -24,6 +24,7 @@ install:
   - appveyor DownloadFile %TBB_URL% -FileName tbb.zip
   - 7z x tbb.zip -oC:\projects\deps > nul
   - move C:\projects\deps\tbb* C:\projects\deps\tbb # Move to a version-agnostic directory
+  - dir C:\projects\deps
   - call "C:\projects\deps\tbb\bin\tbbvars.bat"
 
   ############################################################################
