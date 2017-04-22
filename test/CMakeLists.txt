@@ -2,15 +2,13 @@ include(CheckCXXCompilerFlag)
 
 if (MSVC AND ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
     check_cxx_compiler_flag(-std=c++1y BOOST_HANA_HAS_STD_CPP1Y)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /D _CRT_SECURE_NO_WARNINGS")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /D _CRT_SECURE_NO_WARNINGS /D _CRT_NONSTDC_NO_DEPRECATE")
     set(CMAKE_EXE_LINKER_FLAGS /MANIFEST:NO)
     if (BOOST_HANA_HAS_STD_CPP1Y)
         target_add_compile_options(hana INTERFACE -std=c++1y)
     endif()
 else()
-    # TODO: Set these as interface properties when supported
-    set(CMAKE_CXX_STANDARD 14)
-    set(CMAKE_CXX_STANDARD_REQUIRED YES)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 endif()
 
 if(DOWNLOAD_GTEST OR GTEST_SRC_DIR)
