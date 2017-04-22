@@ -42,4 +42,6 @@ build_script:
   - cmake -G "NMake Makefiles" -DCMAKE_CXX_COMPILER=clang-cl -DDOWNLOAD_GTEST=ON .
   - nmake test_zcode
   - cd test
+
+test_script:
   - .\test_zcode
