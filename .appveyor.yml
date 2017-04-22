@@ -4,8 +4,7 @@ platform:
   - x64
 
 init:
-  - call "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd" /x64
-  - call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" x86_amd64
+  - CALL "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd64
 
 install:
   - cmake -G "NMake Makefiles" -DDOWNLOAD_GTEST=ON .
