@@ -80,7 +80,8 @@ constexpr auto Stencil_array() {
 
 constexpr std::size_t max_level(std::size_t dim, std::size_t freebits, std::size_t size)
 {
-  std::size_t const tmp = size - freebits, level = 0;
+  constexpr std::size_t tmp = size - freebits;
+  constexpr std::size_t level = 0;
   
   while (tmp/dim > (1 << level))
   {
