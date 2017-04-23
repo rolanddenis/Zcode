@@ -116,11 +116,11 @@ TYPED_TEST(NodeTest, brothers)
         node.set_level(level);
         std::cout << "set_level\n";
         brothers(node, b);
-        // auto btrue = TestFixture::build_brothers(level);
-        // for (std::size_t i = 0; i<btrue.size(); ++i)
-        // {
-        //     b[i].set_level(0);
-        //     EXPECT_EQ( b[i].value, btrue[i] );
-        // }
+        auto btrue = TestFixture::build_brothers(level);
+        for (std::size_t i = 0; i<btrue.size(); ++i)
+        {
+            b[i].set_level(0);
+            EXPECT_EQ( b[i].value, btrue[i] );
+        }
     }
 }
