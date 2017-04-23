@@ -109,10 +109,10 @@ void brothers_impl(Node_type const& node, Node_array & Brothers, std::integral_c
 template<typename Node_type, typename Node_array>
 void brothers(Node_type const& node, Node_array & Brothers)
 {
-#ifdef DEBUG
-    if(!node.is_minimal())
-      throw GenericException("brothers",node,"not minimal");
-#endif
+// #ifdef DEBUG
+//     if(!node.is_minimal())
+//       throw GenericException("brothers",node,"not minimal");
+// #endif
     brothers_impl(node, Brothers, std::integral_constant<std::size_t, Node_type::dim>{});
 }
 
