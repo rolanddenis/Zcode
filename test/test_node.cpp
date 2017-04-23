@@ -110,11 +110,11 @@ TYPED_TEST(NodeTest, brothers)
     {
         std::cout << "set node\n";
         node_type node{};
-        // std::cout << "set array\n";
-        // std::array<node_type, ipow(2, dim)> b;
-        // std::cout << "pow: " << ipow(2, dim) << "\n";
-        // node.set_level(level);
-        // std::cout << "set_level\n";
+        std::cout << "set array\n";
+        std::array<node_type, ipow(2, dim)> b;
+        std::cout << "pow: " << ipow(2, dim) << "\n";
+        node.set_level(level);
+        std::cout << "set_level\n";
         //brothers(node, b);
         // auto btrue = TestFixture::build_brothers(level);
         // for (std::size_t i = 0; i<btrue.size(); ++i)
