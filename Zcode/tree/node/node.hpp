@@ -76,9 +76,9 @@ struct Node: public definitions<Dim, node_type>
         node_type tmp = (maskpos - mask);
         node_type keep = (value&tmp) + (value&levelzone);
 
-        // node_type dec = 0;
-        // for (std::size_t i=0; i<stencil; ++i)
-        //     dec = (dec|tmp) + bit;
+        node_type dec = 0;
+        for (std::size_t i=0; i<stencil; ++i)
+            dec = (dec|tmp) + bit;
 
         // node_type move = (value&mask) + (dec|tmp);
         // // if voidbit is True, keep it !!
