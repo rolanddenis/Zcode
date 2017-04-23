@@ -90,13 +90,13 @@ void brothers_impl(Node_type const& node, Node_array & Brothers, std::integral_c
     std::array<std::array<int, 3>, 8> stencil{{ {{0, 0, 0}},
                                                 {{0, 1, 0}},
                                                 {{1, 0, 0}},
-                                                {{1, 1, 0}}//,
-                                                //{{0, 0, 1}},
-                                                //{{0, 1, 1}},
-                                                //{{1, 0, 1}},
-                                                //{{1, 1, 1}}
+                                                {{1, 1, 0}},
+                                                {{0, 0, 1}},
+                                                {{0, 1, 1}},
+                                                {{1, 0, 1}},
+                                                {{1, 1, 1}}
                                              }};
-    //neighbors(node, Brothers, stencil);
+    neighbors(node, Brothers, stencil);
 }
 
 //! Make the list of the brothers of a minimal node in a brothers set.
