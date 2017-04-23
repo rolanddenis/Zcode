@@ -47,7 +47,8 @@ build_script:
   - cd test
 
 test_script:
-  - .\test_zcode > test.log 2>&1
+  - .\test_zcode > C:\projects\Zcode\test.log 2>&1
 
 on_failure:
+  - dir C:\projects\Zcode
   - ps: get-content C:\projects\Zcode\test.log
