@@ -49,5 +49,5 @@ build_script:
 test_script:
   - .\test_zcode > test.log 2>&1
 
-on_on_failure:
+on_failure:
   - get-content C:\projects\Zcode\test.log
