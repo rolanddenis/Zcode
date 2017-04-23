@@ -67,6 +67,9 @@ struct Node: public definitions<Dim, node_type>
 
     inline Node plus(direction d, std::size_t stencil=1) const
     {
+        if (stencil == 0)
+            return *this;
+
         auto dummy = _get_dec(d);
         auto bit = dummy.first;
         auto mask = dummy.second;
