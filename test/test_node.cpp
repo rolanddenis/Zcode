@@ -39,7 +39,8 @@ struct NodeTest: public ::testing::Test {
     }
 };
 
-typedef ::testing::Types<DIM_GROUP(unsigned short), DIM_GROUP(unsigned int), DIM_GROUP(std::size_t)> NodeTypes;
+//typedef ::testing::Types<DIM_GROUP(unsigned short), DIM_GROUP(unsigned int), DIM_GROUP(std::size_t)> NodeTypes;
+typedef ::testing::Types<DIM_GROUP(unsigned int), DIM_GROUP(std::size_t)> NodeTypes;
 TYPED_TEST_CASE(NodeTest, NodeTypes);
 
 TYPED_TEST(NodeTest, constructor)
