@@ -108,7 +108,9 @@ TYPED_TEST(NodeTest, brothers)
 
     for(std::size_t level=0; level<4; ++level)
     {
+        std::cout << "set node\n";
         node_type node{};
+        std::cout << "set array\n";
         std::array<node_type, ipow(2, dim)> b;
         std::cout << "pow: " << ipow(2, dim) << "\n";
         node.set_level(level);
