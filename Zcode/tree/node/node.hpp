@@ -80,9 +80,9 @@ struct Node: public definitions<Dim, node_type>
         for (std::size_t i=0; i<stencil; ++i)
             dec = (dec|tmp) + bit;
 
-        // node_type move = (value&mask) + (dec|tmp);
-        // // if voidbit is True, keep it !!
-        // node_type is_void = ((value&voidbit)||(move&(~maskpos)))? voidbit: 0;
+        node_type move = (value&mask) + (dec|tmp);
+        // if voidbit is True, keep it !!
+        node_type is_void = ((value&voidbit)||(move&(~maskpos)))? voidbit: 0;
         // return {static_cast<node_type>(((move&mask)&AllOnes[level()]) + keep + is_void)};
         return *this;
     }
