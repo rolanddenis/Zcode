@@ -50,4 +50,4 @@ test_script:
   - .\test_zcode > test.log 2>&1
 
 on_failure:
-  - get-content C:\projects\Zcode\test.log
+  - ps: get-content C:\projects\Zcode\test.log
