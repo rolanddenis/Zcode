@@ -56,8 +56,9 @@ void neighbors(Node_type const& node,
     std::size_t index = 0;
     for(auto &s: stencil)
     {
-        Node_type node_x = (s[0]<0)?node.minus(direction::x, -s[0]): node.plus(direction::x, s[0]);
-        Node_type node_y = (s[1]<0)?node_x.minus(direction::y, -s[1]): node_x.plus(direction::y, s[1]);
+        std::cout << s[0] << " " << s[1] << " " << s[2] << "\n";
+        //Node_type node_x = (s[0]<0)?node.minus(direction::x, -s[0]): node.plus(direction::x, s[0]);
+        //Node_type node_y = (s[1]<0)?node_x.minus(direction::y, -s[1]): node_x.plus(direction::y, s[1]);
         //node_array[index++] = (s[2]<0)? node_y.minus(direction::z, -s[2]): node_y.plus(direction::z, s[2]);
     }
 }
