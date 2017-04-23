@@ -115,7 +115,7 @@ TYPED_TEST(NodeTest, brothers)
         std::cout << "pow: " << ipow(2, dim) << "\n";
         node.set_level(level);
         std::cout << "set_level\n";
-        //brothers(node, b);
+        brothers(node, b);
         // auto btrue = TestFixture::build_brothers(level);
         // for (std::size_t i = 0; i<btrue.size(); ++i)
         // {
