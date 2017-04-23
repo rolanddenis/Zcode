@@ -83,7 +83,7 @@ struct Node: public definitions<Dim, node_type>
         node_type move = (value&mask) + (dec|tmp);
         // if voidbit is True, keep it !!
         node_type is_void = ((value&voidbit)||(move&(~maskpos)))? voidbit: 0;
-        return {static_cast<node_type>((move.value&mask.value)&AllOnes[level()]) + keep + is_void};
+        return ((move&mask)&AllOnes[level()]) + keep + is_void;
     }
 
     inline Node minus(direction d, std::size_t stencil=1) const{
@@ -100,7 +100,7 @@ struct Node: public definitions<Dim, node_type>
         node_type move = (value&mask) - (dec&mask);
         // if voidbit is True, keep it !!
         node_type is_void = ((value&voidbit)||(move&(~maskpos)))? voidbit: 0;
-        return {static_cast<node_type>(((move&mask)&AllOnes[level()]) + keep + is_void)};
+        return ((move&mask)&AllOnes[level()]) + keep + is_void;
     }
 
     //! test if the node as max coordinate 
