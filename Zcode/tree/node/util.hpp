@@ -6,10 +6,10 @@
 /// Generate a number with all digits in range (0,n-1) set to one
 ///  (metaprogram).
 ///
-/// Use it like: 
+/// Use it like:
 ///
 ///  static const int k=AllSet2One<n>:value;
-///  with n=3, this gives k=7. 
+///  with n=3, this gives k=7.
 ///
 /// \brief generate a number with digits (0,n-1) set to 1.
 ////////////////////////////////////////////////////////////////////////
@@ -66,7 +66,7 @@ constexpr auto Stencil_array() {
 constexpr std::size_t max_level(std::size_t const dim, std::size_t  const freebits, std::size_t  const size)
 {
   std::size_t tmp = size - freebits, level = 0;
-  
+
   while (tmp/dim > (1 << level))
   {
     tmp--;
