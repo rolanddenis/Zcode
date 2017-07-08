@@ -165,7 +165,6 @@ TYPED_TEST(SlotTest, hasvoidnodes)
 {
     auto const dim = TestFixture::dim;
     using value_type = typename TestFixture::value_type;
-    using node_type = Node<dim, value_type>;
 
     slot<dim, value_type> slot{10};
     EXPECT_EQ( slot.hasvoidNodes(), false );
