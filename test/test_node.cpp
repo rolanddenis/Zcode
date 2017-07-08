@@ -39,8 +39,7 @@ struct NodeTest: public ::testing::Test {
     }
 };
 
-//typedef ::testing::Types<DIM_GROUP(unsigned short), DIM_GROUP(unsigned int), DIM_GROUP(std::size_t)> NodeTypes;
-typedef ::testing::Types<DIM_GROUP(unsigned int), DIM_GROUP(std::size_t)> NodeTypes;
+typedef ::testing::Types<DIM_GROUP(unsigned short), DIM_GROUP(unsigned int), DIM_GROUP(std::size_t)> NodeTypes;
 TYPED_TEST_CASE(NodeTest, NodeTypes);
 
 TYPED_TEST(NodeTest, constructor)
@@ -107,7 +106,7 @@ TYPED_TEST(NodeTest, brothers)
     using value_type = typename TestFixture::value_type;
     using node_type = Node<dim, value_type>;
 
-    for(std::size_t level=0; level<4; ++level)
+    for ( std::size_t level = 0; level < node_type::nlevels; ++level)
     {
         std::cout << "set node\n";
         node_type node{};
