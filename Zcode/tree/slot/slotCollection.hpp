@@ -73,10 +73,10 @@ struct slotCollection:private std::vector<std::shared_ptr<slot<dim, value_type>>
                    std::size_t _slotsize, 
                    std::size_t _dupsize, 
                    std::size_t _breaksize):
-                   dupsize{_dupsize},
-                   breaksize{_breaksize},
-                   smax{AllOnes[nlevels-1]},
-                   countNodes{0}
+        breaksize{_breaksize},
+        countNodes{0},
+        dupsize{_dupsize},
+        smax{AllOnes[nlevels-1]}
     {
         reserve(_nslots);
         push_back(std::make_shared<slot_type>(0, smax, _slotsize));
@@ -85,10 +85,10 @@ struct slotCollection:private std::vector<std::shared_ptr<slot<dim, value_type>>
 
     // remark: this copy constructor doesn't set the same capacity of the copied slotCollection
     slotCollection(slotCollection const& SC):
-        dupsize{SC.dupsize},
         breaksize{SC.breaksize},
-        smax{AllOnes[nlevels-1]},
-        countNodes{SC.countNodes}
+        countNodes{SC.countNodes},
+        dupsize{SC.dupsize},
+        smax{AllOnes[nlevels-1]}
     {
         for(std::size_t i=0; i<SC.size(); ++i)
             push_back(std::make_shared<slot_type>(*SC[i]));
