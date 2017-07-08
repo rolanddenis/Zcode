@@ -230,7 +230,7 @@ std::ostream& operator<<(std::ostream &os, const Node<dim, value_type> &node)
 
     node_type IntOne{1};//!<! 1! 
 
-    for( std::size_t i = size-1; i >= 0; i-- )
+    for( int i = size-1; i >= 0; i-- )
     {
         if(node&(IntOne<<i))
             s+='1';
@@ -241,7 +241,7 @@ std::ostream& operator<<(std::ostream &os, const Node<dim, value_type> &node)
         //else if(i==levelshift ||i==size-1)
         else if(i==levelshift)
             s+='.';
-        else if(i%dim==0 && i>0 && i<dim*nlevels)
+        else if ( i%dim == 0 && i > 0 && static_cast<std::size_t>(i) < dim*nlevels)
             s+='.';
     }
 
