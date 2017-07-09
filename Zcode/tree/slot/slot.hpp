@@ -21,10 +21,10 @@ void myreplace_if(ForwardIt first, ForwardIt last,
 ///
 /// \brief slot structures, store a set of Nodes.
 ////////////////////////////////////////////////////////////////////////////
-template<std::size_t dim, typename value_type=std::size_t> 
-struct slot: private std::vector<Node<dim, value_type>>
+template < std::size_t dim, typename node_value_type = std::size_t > 
+struct slot: private std::vector< Node<dim, node_value_type> >
 {
-    using node_type = Node<dim, value_type>;
+    using node_type = Node<dim, node_value_type>;
     using parent = std::vector<node_type>;
     using parent::operator[];
     using parent::push_back;
@@ -40,10 +40,10 @@ struct slot: private std::vector<Node<dim, value_type>>
     using parent::capacity;
     using parent::shrink_to_fit;
 
-    static const value_type FreeBitsPart = node_type::FreeBitsPart;
-    static const value_type voidbit = node_type::voidbit;
-    static const value_type maskpos = node_type::maskpos;
-    static const value_type decal = dim*node_type::nlevels;
+    static const node_value_type FreeBitsPart = node_type::FreeBitsPart;
+    static const node_value_type voidbit = node_type::voidbit;
+    static const node_value_type maskpos = node_type::maskpos;
+    static const node_value_type decal = dim*node_type::nlevels;
 
     node_type s1{0}, s2{node_type::AllOnes[node_type::nlevels-1]};
 
@@ -195,7 +195,7 @@ public:
     //! \param mark for the test.
     bool markedOther(node_type mark)
     {
-        node_type N{static_cast<value_type>(FreeBitsPart-mark.value)};
+        node_type N{static_cast<node_value_type>(FreeBitsPart-mark.value)};
         const unsigned char m = (N.value&FreeBitsPart)>>decal;
         return slotMark&m;
     }
@@ -377,8 +377,8 @@ public:
     void restore(std::ifstream& f)
     {
         std::size_t ssize; 
-        value_type ss1;
-        value_type ss2;
+        node_value_type ss1;
+        node_value_type ss2;
         f >> ssize;
         f >> ss2; 
         f >> ss1; 
@@ -387,7 +387,7 @@ public:
         s2 = ss2; 
         for(std::size_t j=0; j<ssize; j++)
         {
-            value_type N;
+            node_value_type N;
             f >> N;
             put(node_type{N});
         }
@@ -395,8 +395,8 @@ public:
     
 };
 
-template<std::size_t dim, typename value_type>
-std::ostream& operator<<(std::ostream& os, const slot<dim, value_type>& sl)
+template<std::size_t dim, typename node_value_type>
+std::ostream& operator<<(std::ostream& os, const slot<dim, node_value_type>& sl)
 {
     os << "slot\n";
     os << "s1: " << sl.s1 << "\n";

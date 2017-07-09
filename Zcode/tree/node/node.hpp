@@ -143,6 +143,7 @@ struct Node: public definitions<Dim, node_type>
 
     inline void set_level(std::size_t lev)
     {
+        assert( lev < nlevels );
         value = (value&maskpos) + (lev<<levelshift);
     }
 
