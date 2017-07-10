@@ -11,15 +11,15 @@
 #include <tree/slot/cache.hpp>
 
 
-template<std::size_t dim, typename value_type>
-struct slotCollection:private std::vector<std::shared_ptr<slot<dim, value_type>>>,
-                      public definitions<dim, value_type>
-// struct slotCollection:private std::vector<slot<dim, value_type>>,
-//                       public definitions<dim, value_type>
+template < std::size_t dim, typename node_value_type >
+struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_value_type> > >,
+                        public definitions<dim, node_value_type>
+// struct slotCollection:private std::vector<slot<dim, node_value_type>>,
+//                       public definitions<dim, node_value_type>
 {
-    using slot_type = slot<dim, value_type>;
+    using slot_type = slot<dim, node_value_type>;
     using node_type = typename slot_type::node_type;
-    using definition = definitions<dim, value_type>;
+    using definition = definitions<dim, node_value_type>;
 
     using definition::nlevels;
     using definition::AllOnes;
@@ -42,14 +42,14 @@ struct slotCollection:private std::vector<std::shared_ptr<slot<dim, value_type>>
 
 
     // static const std::size_t nlevels = node_type::nlevels;
-    // static constexpr std::array<value_type, nlevels> AllOnes = node_type::AllOnes;
+    // static constexpr std::array<node_value_type, nlevels> AllOnes = node_type::AllOnes;
 
     //static const std::size_t sizestt=SLOTCOLLECTION_SIZESTT;
 
     std::array<std::size_t, nlevels+1> countlev;//! used to count the Nodes level by level
     std::size_t breaksize;//!< size of slot which triggers decomposition of a slot.
     //! cache used to avoid repetitive search of slots.
-    Cache<dim, value_type> cache;
+    Cache<dim, node_value_type> cache;
     std::size_t countNodes;//!< number of Nodes stored in slots.
     std::size_t maxslotsize;//! maximum size of slots stored.
     std::size_t dupsize;//!< size of slot which triggers fusion of two slots.
@@ -148,7 +148,7 @@ struct slotCollection:private std::vector<std::shared_ptr<slot<dim, value_type>>
     //! store one node.
     //! \param x Node
     //! \param cach this version  uses an external Cache (this is thread safe)
-    inline void put(node_type x, Cache<dim, value_type>& cach)
+    inline void put(node_type x, Cache<dim, node_value_type>& cach)
     {
         node_type xh = x.hash(), xabs = xh&node_type::maskpos;
         auto stloc = cach.find(xabs);
@@ -225,7 +225,7 @@ struct slotCollection:private std::vector<std::shared_ptr<slot<dim, value_type>>
     //! \param cach cache updated.
     //! \note we do not directly check if the Node is really non hashed, but
     // this is checked in "xh=hash(x)".
-    inline bool find(node_type x, Cache<dim, value_type>& cach) const
+    inline bool find(node_type x, Cache<dim, node_value_type>& cach) const
     {
         node_type xh = x.hash(), xabs = xh&node_type::maskpos;
         auto stloc = cach.find(xabs);
@@ -336,8 +336,8 @@ struct slotCollection:private std::vector<std::shared_ptr<slot<dim, value_type>>
 
 };
 
-template<std::size_t dim, typename value_type>
-std::ostream& operator<<(std::ostream& os, const slotCollection<dim, value_type>& st)
+template<std::size_t dim, typename node_value_type>
+std::ostream& operator<<(std::ostream& os, const slotCollection<dim, node_value_type>& st)
 {
     os << "slotCollection\n";
     os << st.smax << "\n";

@@ -6,10 +6,10 @@
 /// Generate a number with all digits in range (0,n-1) set to one
 ///  (metaprogram).
 ///
-/// Use it like: 
+/// Use it like:
 ///
 ///  static const int k=AllSet2One<n>:value;
-///  with n=3, this gives k=7. 
+///  with n=3, this gives k=7.
 ///
 /// \brief generate a number with digits (0,n-1) set to 1.
 ////////////////////////////////////////////////////////////////////////
@@ -24,29 +24,14 @@ template<int dim, typename node_type> struct AllSet2One<dim, 0, node_type>
 
 // Construction of Ones array
 // C++ 14 version
-template <typename node_type, std::size_t level>
-constexpr node_type Ones(std::size_t dim, node_type bit) {
-  return Ones<node_type, level-1>(dim, bit) + (bit>>(dim*level));
-}
-
-template <>
-constexpr unsigned short Ones<unsigned short, 0>(std::size_t dim, unsigned short bit) {
-    return bit;
-}
-
-template <>
-constexpr unsigned int Ones<unsigned int, 0>(std::size_t dim, unsigned int bit) {
-    return bit;
-}
-
-template <>
-constexpr std::size_t Ones<std::size_t, 0>(std::size_t dim, std::size_t bit) {
-    return bit;
+template <typename node_type>
+constexpr node_type Ones(std::size_t level, std::size_t dim, node_type bit) {
+  return level > 0 ? Ones(level-1, dim, bit) + ( bit >> (dim*level) ) : bit;
 }
 
 template<typename node_type, std::size_t... i>
 constexpr auto Ones_array(std::size_t dim, node_type bit, std::index_sequence<i...>) {
-    return std::array<node_type, sizeof...(i)>{{Ones<node_type, i>(dim, bit)...}};
+    return std::array<node_type, sizeof...(i)>{{ Ones<node_type>(i, dim, bit)... }};
 }
 
 template<std::size_t size, typename node_type>
@@ -81,7 +66,6 @@ constexpr auto Stencil_array() {
 constexpr std::size_t max_level(std::size_t const dim, std::size_t  const freebits, std::size_t  const size)
 {
   std::size_t tmp = size - freebits, level = 0;
-  
   while (tmp/dim > (1ul << level))
   {
     tmp--;
