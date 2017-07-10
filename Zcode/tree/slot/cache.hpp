@@ -32,8 +32,10 @@ struct Cache
     {
         auto index = std::find_if(st.cbegin(), st.cend(), [&](auto &n){return (hashN>=n.s1 && hashN<n.s2);});
         if (index != st.end())
+        {
             current = std::distance(st.begin(), index);
             return st[current];
+        }
         return nullptr;
     }
 

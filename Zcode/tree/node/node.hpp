@@ -91,7 +91,7 @@ struct Node: public definitions<Dim, node_type>
         auto bit = dummy.first;
         auto mask = dummy.second;
         node_type tmp = (maskpos - mask);
-        node_type keep = value&tmp + (value&levelzone);
+        node_type keep = (value&tmp) + (value&levelzone);
 
         node_type dec = 0;
         for (std::size_t i=0; i<stencil; ++i)
@@ -159,7 +159,7 @@ struct Node: public definitions<Dim, node_type>
     //! \note we do not check V.
     inline void setTags(Node &n) const
     {
-        n.value = ((n.value)&partWithoutFreeBits) + value&FreeBitsPart;
+        n.value = ((n.value)&partWithoutFreeBits) + (value&FreeBitsPart);
     }
 
     //! return the hash code for nodes.
@@ -231,7 +231,7 @@ std::ostream& operator<<(std::ostream &os, const Node<dim, value_type> &node)
 
     node_type IntOne{1};//!<! 1! 
 
-    for(int i=size-1;i>=0;i--)
+    for( int i = size-1; i >= 0; i-- )
     {
         if(node&(IntOne<<i))
             s+='1';
@@ -242,7 +242,7 @@ std::ostream& operator<<(std::ostream &os, const Node<dim, value_type> &node)
         //else if(i==levelshift ||i==size-1)
         else if(i==levelshift)
             s+='.';
-        else if(i%dim==0 && i>0 && i<dim*nlevels)
+        else if ( i%dim == 0 && i > 0 && static_cast<std::size_t>(i) < dim*nlevels)
             s+='.';
     }
 
