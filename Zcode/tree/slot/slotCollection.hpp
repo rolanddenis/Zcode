@@ -14,8 +14,6 @@
 template < std::size_t dim, typename node_value_type >
 struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_value_type> > >,
                         public definitions<dim, node_value_type>
-// struct slotCollection:private std::vector<slot<dim, node_value_type>>,
-//                       public definitions<dim, node_value_type>
 {
     using slot_type = slot<dim, node_value_type>;
     using node_type = typename slot_type::node_type;
@@ -25,7 +23,6 @@ struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_val
     using definition::AllOnes;
     
     using parent = std::vector<std::shared_ptr<slot_type>>;
-    //using parent = std::vector<slot_type>;
     using parent::operator[];
     using parent::push_back;
     using parent::insert;
@@ -39,12 +36,6 @@ struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_val
     using parent::size;
     using parent::capacity;
     using parent::shrink_to_fit;
-
-
-    // static const std::size_t nlevels = node_type::nlevels;
-    // static constexpr std::array<node_value_type, nlevels> AllOnes = node_type::AllOnes;
-
-    //static const std::size_t sizestt=SLOTCOLLECTION_SIZESTT;
 
     std::array<std::size_t, nlevels+1> countlev;//! used to count the Nodes level by level
     std::size_t breaksize;//!< size of slot which triggers decomposition of a slot.
