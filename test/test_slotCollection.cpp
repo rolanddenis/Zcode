@@ -111,3 +111,16 @@ TYPED_TEST(SlotCollectionTest, ubound)
     EXPECT_EQ(SC.ubound(n2).get(), SC[1].get());
     EXPECT_EQ(SC.ubound_hashed(n2.hash()).get(), SC[1].get()); 
 }
+
+TYPED_TEST(SlotCollectionTest, compress)
+{
+    auto const dim = TestFixture::dim;
+    using value_type = typename TestFixture::value_type;
+    using node_type = Node<dim, value_type>;
+    using slot_type = slot<dim, value_type>;
+    
+    slotCollection<dim, value_type> SC{2, 10, 10, 11};
+    SC.push_back(std::make_shared<slot_type>(10));
+   
+    SC.compress();
+}

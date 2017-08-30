@@ -50,7 +50,6 @@ struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_val
     std::size_t breaksize;//!< size of slot which triggers decomposition of a slot.
     //! cache used to avoid repetitive search of slots.
     Cache<dim, node_value_type> cache;
-    std::size_t countNodes;//!< number of Nodes stored in slots.
     std::size_t maxslotsize;//! maximum size of slots stored.
     std::size_t dupsize;//!< size of slot which triggers fusion of two slots.
     node_type smax; //!< max. value of hash function for Nodes.
@@ -74,7 +73,6 @@ struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_val
                    std::size_t _dupsize, 
                    std::size_t _breaksize):
         breaksize{_breaksize},
-        countNodes{0},
         dupsize{_dupsize},
         smax{AllOnes[nlevels-1]}
     {
@@ -86,7 +84,6 @@ struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_val
     // remark: this copy constructor doesn't set the same capacity of the copied slotCollection
     slotCollection(slotCollection const& SC):
         breaksize{SC.breaksize},
-        countNodes{SC.countNodes},
         dupsize{SC.dupsize},
         smax{AllOnes[nlevels-1]}
     {
@@ -109,7 +106,6 @@ struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_val
     // \parameter  C SlotCollection to be "cloned"
     inline void clone(const slotCollection& C)
     {
-        countNodes=0; //! not a copy of C!
         dupsize=C.dupsize; breaksize=C.breaksize;
         smax=C.smax;
         for(std::size_t i=0; i<C.size(); ++i)
@@ -158,20 +154,16 @@ struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_val
             cach.putSlot(stloc);
         }
         stloc->put(xh);
-        ++countNodes;
     }
 
     //! number of Nodes stored.
     inline std::size_t nbNodes() const 
     {
+        std::size_t countNodes = 0;
+        for ( auto const& slot : *this )
+            countNodes += slot.size();
+
         return countNodes;
-    }
-    
-    //! Set the Number of Nodes stored (dangerous!)
-    //! \param n number of Nodes
-    inline void setnbNodes(int n) const 
-    {
-        countNodes=n;
     }
 
     //! number of Nodes, by level
@@ -249,8 +241,7 @@ struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_val
     //! update the count of leaves.
     inline void compress(node_type val=node_type::voidbit)
     {
-        countNodes = 0;
-        std::for_each(begin(), end(), [&val, this](auto& st){st->compress(val); countNodes+=st->Size();});
+        std::for_each(begin(), end(), [&val](auto& st){st->compress(val);});
     }
     //! empty all the slots.
     inline void clear()
@@ -278,7 +269,6 @@ struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_val
 
         std::size_t wmax=0;
 
-        countNodes = 0;
         maxslotsize = 0;
         *this[0]->setStartrank(0);
         *this[0]->setSlotrank(0);
@@ -287,7 +277,6 @@ struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_val
             if (i > 0)
                 *this[i]->setStartrank(*this[i-1]->Startrank()+wmax);
             wmax = *this[i]->size();
-            countNodes += wmax;
             for(std::size_t j=0; j<wmax; ++j)
                 ++countlev[(*this[i])[j].level()];
             maxslotsize = std::max(maxslotsize, wmax);
@@ -312,7 +301,6 @@ struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_val
     //! compute ranks, maxslotsize...
     inline void relink()
     {
-        countNodes=0;
         maxslotsize=0;
         std::size_t wmax=0;
         *this[0]->setStartrank(0);
@@ -322,7 +310,6 @@ struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_val
             if(i>0)
                 *this[i]->setStartrank(*this[i-1]->Startrank()+wmax);
             wmax = *this[i]->Size();
-            countNodes += wmax;
             maxslotsize = std::max(maxslotsize,wmax);
             *this[i]->setSlotrank(i);
         }
