@@ -7,14 +7,16 @@ template<std::size_t dim, typename value_type>
 struct Cache
 {
     static const int size = 10;
-    using slot_type = std::weak_ptr<slot<dim, value_type>>;
-    using node_type = typename slot<dim, value_type>::node_type;
+    using slot_type         = slot<dim, value_type>;
+    using slot_weak_type    = std::weak_ptr<slot_type>;
+    using slot_shared_type  = std::shared_ptr<slot_type>; 
+    using node_type = typename slot_type::node_type;
 
     Cache(const Cache&) = default;
     
     mutable std::size_t current, newest;
-    std::array<slot_type, size> st; 
-    std::array<std::size_t, size> pos;//!< last position found by SlotCollection::find() 
+    std::array<slot_weak_type, size>    st; 
+    std::array<std::size_t, size>       pos;    //!< Last node position found by SlotCollection::find() 
     //ZZ! pos is *not* initialized by SlotCollection::put !! use
     // this->getslot()->lastPos() for this. !!!
 
@@ -28,14 +30,15 @@ struct Cache
     //! Is a Node in the slots pointed?
     //! \param hashN the Node
     //! \note hashN *must* be hashed!
-    inline slot_type find(node_type hashN) const
+    inline slot_shared_type find(node_type hashN) const
     {
-        auto index = std::find_if(st.cbegin(), st.cend(), [&](auto &n){return (hashN>=n.s1 && hashN<n.s2);});
-        if (index != st.end())
+        const auto slot_it = std::find_if(st.cbegin(), st.cend(), [&](auto &n){ auto slot = n.lock(); return ( slot && hashN >= slot->s1 && hashN < slot->s2 ); });
+        if ( slot_it != st.cend() )
         {
-            current = std::distance(st.begin(), index);
-            return st[current];
+            current = std::distance( st.cbegin(), slot_it );
+            return slot_it->lock();
         }
+        
         return nullptr;
     }
 
@@ -48,7 +51,8 @@ struct Cache
     //inline Node* pointerTo() const  {return st[current]->pointerto(pos[current]);}
     
     //! return a pointer to the slot.
-    inline slot_type& getslot() const 
+    //! TODO
+    inline slot_weak_type& getslot() const 
     {
         return st[current];
     }
@@ -91,13 +95,13 @@ struct Cache
 
     //! put the datas of a slot
     //! \param slo the slot
-    inline void putSlot(std::shared_ptr<slot<dim, value_type>>& slo)
+    inline void putSlot( slot_shared_type const & slot_ptr )
     {
         //find the oldest slot:
         //int oldest=(newest+size-1)%size;
         std::size_t oldest = (newest+1)%size;
 
-        st[oldest] = slo;
+        st[oldest] = slot_ptr;
 
         newest = oldest;
         current = newest;

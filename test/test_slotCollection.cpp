@@ -2,6 +2,10 @@
 #include <tuple>
 #include <tree/slot/slotCollection.hpp>
 #include <tree/node/node.hpp>
+#include <tree/slot/cache.hpp>
+
+#include <utility>
+#include <vector>
 
 #define DIM_GROUP(T) std::tuple<std::integral_constant<std::size_t, 1>, T>, std::tuple<std::integral_constant<std::size_t, 2>, T>, std::tuple<std::integral_constant<std::size_t, 3>, T>
 
@@ -24,7 +28,7 @@ TYPED_TEST(SlotCollectionTest, constructor)
     EXPECT_EQ( SC.capacity(), 2 );
     EXPECT_EQ( SC.size(), 1 );
     node_type n{1};
-    SC[0]->put(n);
+    SC.insert(n);
     EXPECT_EQ( SC[0]->capacity(), 10 );
     EXPECT_EQ( SC[0]->size(), 1 );
     // remark: we don't set capacity for slotCollection and slot in the copy constructor
@@ -45,7 +49,7 @@ TYPED_TEST(SlotCollectionTest, clone)
     EXPECT_EQ( SC.capacity(), 2 );
     EXPECT_EQ( SC.size(), 1 );
     node_type n{1};
-    SC[0]->put(n);
+    SC.insert(n);
 
     slotCollection<dim, value_type> SCclone{};
     SCclone.clone(SC);
@@ -64,18 +68,18 @@ TYPED_TEST(SlotCollectionTest, swap)
     slotCollection<dim, value_type> SC1{2, 10, 10, 11};
     slotCollection<dim, value_type> SC2{10, 5, 5, 6};
     node_type n1{1}, n2{2};
-    SC1[0]->put(n1);
-    SC1[0]->put(n2);
-    SC2[0]->put(n1);
+    SC1.insert(n1);
+    SC1.insert(n2);
+    SC2.insert(n1);
     
-    SC1.swap(SC2);
+    std::swap(SC1, SC2);
     EXPECT_EQ( SC1[0]->size(), 1 );
-    EXPECT_EQ( SC1.dupsize, 5 );
-    EXPECT_EQ( SC1.breaksize, 6 );
+    EXPECT_EQ( SC1.slot_min_size, 5 );
+    EXPECT_EQ( SC1.slot_max_size, 6 );
 
     EXPECT_EQ( SC2[0]->size(), 2 );
-    EXPECT_EQ( SC2.dupsize, 10 );
-    EXPECT_EQ( SC2.breaksize, 11 );
+    EXPECT_EQ( SC2.slot_min_size, 10 );
+    EXPECT_EQ( SC2.slot_max_size, 11 );
 }
 
 TYPED_TEST(SlotCollectionTest, findSlot)
@@ -87,7 +91,7 @@ TYPED_TEST(SlotCollectionTest, findSlot)
     
     slotCollection<dim, value_type> SC{2, 10, 10, 11};
     SC.push_back(std::make_shared<slot_type>(2, 4, 10));
-    SC[0]-> s2 = 2;
+    SC[0]->s2 = 2;
     node_type n1{1}, n2{3}, n3{5};
     EXPECT_EQ(SC.findSlot(n1, 0, SC.size()-1), 0); 
     EXPECT_EQ(SC.findSlot(n2, 0, SC.size()-1), 1); 
@@ -110,4 +114,136 @@ TYPED_TEST(SlotCollectionTest, ubound)
     EXPECT_EQ(SC.ubound_hashed(n1.hash()).get(), SC[0].get());
     EXPECT_EQ(SC.ubound(n2).get(), SC[1].get());
     EXPECT_EQ(SC.ubound_hashed(n2.hash()).get(), SC[1].get()); 
+}
+
+TYPED_TEST(SlotCollectionTest, compress)
+{
+    auto const dim = TestFixture::dim;
+    using value_type = typename TestFixture::value_type;
+    using node_type = Node<dim, value_type>;
+    using slot_type = slot<dim, value_type>;
+    
+    slotCollection<dim, value_type> SC{2, 10, 10, 11};
+    SC.push_back(std::make_shared<slot_type>(10));
+   
+    SC.compress();
+}
+
+TYPED_TEST(SlotCollectionTest, nbNodes)
+{
+    auto const dim = TestFixture::dim;
+    using value_type = typename TestFixture::value_type;
+    using node_type = Node<dim, value_type>;
+    using slot_type = slot<dim, value_type>;
+    
+    slotCollection<dim, value_type> SC{2, 10, 10, 11};
+    SC.push_back(std::make_shared<slot_type>(10));
+
+    const std::size_t N = 100;
+    EXPECT_EQ( SC.nbNodes(), 0 );
+    for ( std::size_t i = 0; i < N; ++i )
+    {
+        SC.insert( node_type(i) );
+        EXPECT_EQ( SC.nbNodes(), i+1 );
+    }
+}
+
+TYPED_TEST(SlotCollectionTest, count)
+{
+    auto const dim = TestFixture::dim;
+    using value_type = typename TestFixture::value_type;
+    using node_type = Node<dim, value_type>;
+
+    slotCollection<dim, value_type> SC{2, 10, 10, 11};
+    node_type n1{1}, n2{2}, n3{3};
+    SC.insert(n1);
+    SC.insert(n2);
+    
+    EXPECT_EQ( SC.count( n1 ), 1 );
+    EXPECT_EQ( SC.count( n2 ), 1 );
+    EXPECT_EQ( SC.count( n3 ), 0 );
+}
+
+TYPED_TEST(SlotCollectionTest, count_with_cache)
+{
+    auto const dim = TestFixture::dim;
+    using value_type = typename TestFixture::value_type;
+    using node_type = Node<dim, value_type>;
+    using cache_type = Cache<dim, value_type>;
+
+    cache_type cache{};
+
+    slotCollection<dim, value_type> SC{2, 10, 10, 11};
+    const node_type n1{1}, n2{2}, n3{3};
+    SC.insert(n1, cache);
+    SC.insert(n2, cache);
+    
+    EXPECT_EQ( SC.count( n1, cache ), 1 );
+    EXPECT_EQ( SC.count( n2, cache ), 1 );
+    EXPECT_EQ( SC.count( n3, cache ), 0 );
+}
+
+TYPED_TEST(SlotCollectionTest, nbNodesByLevel)
+{
+    auto const dim = TestFixture::dim;
+    using value_type = typename TestFixture::value_type;
+    using node_type = Node<dim, value_type>;
+
+    slotCollection<dim, value_type> SC{2, 10, 10, 11};
+    node_type n1{1}; n1.set_level(0);
+    node_type n2{2}; n2.set_level(1);
+    node_type n3{3}; n3.set_level(1);
+
+    SC.insert(n1);
+    SC.insert(n2);
+    SC.insert(n3);
+    
+    // TODO: adding node in different slots.
+
+    const auto level_count = SC.nbNodesByLevel();
+
+    EXPECT_EQ( level_count[0], 1 );
+    EXPECT_EQ( level_count[1], 2 );
+    EXPECT_EQ( level_count[2], 0 );
+}
+
+TYPED_TEST(SlotCollectionTest, maxSlotSize)
+{
+    auto const dim = TestFixture::dim;
+    using value_type = typename TestFixture::value_type;
+    using node_type = Node<dim, value_type>;
+
+    slotCollection<dim, value_type> SC{2, 10, 10, 11};
+    const node_type n1{1}, n2{2}, n3{3};
+
+    SC.insert(n1);
+    SC.insert(n2);
+    SC.insert(n3);
+    
+    // TODO: adding node in different slots.
+
+    EXPECT_EQ( SC.maxSlotSize(), 3 );
+}
+
+TYPED_TEST(SlotCollectionTest, copyInArray)
+{
+    auto const dim = TestFixture::dim;
+    using value_type = typename TestFixture::value_type;
+    using node_type = Node<dim, value_type>;
+
+    slotCollection<dim, value_type> SC{2, 10, 10, 11};
+    const node_type n1{1}, n2{2}, n3{3};
+
+    SC.insert(n1);
+    SC.insert(n2);
+    SC.insert(n3);
+    
+    // TODO: adding node in different slots.
+    
+    std::vector<node_type> array( 3 );
+    SC.copyInArray( array );
+
+    EXPECT_EQ( array[0], n1.hash() );
+    EXPECT_EQ( array[1], n2.hash() );
+    EXPECT_EQ( array[2], n3.hash() );
 }
