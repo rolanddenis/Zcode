@@ -22,17 +22,12 @@ struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_val
     using parent = std::vector<std::shared_ptr<slot_type>>;
     using parent::operator[];
     using parent::push_back;
-    using parent::insert;
-    using parent::erase;
     using parent::reserve;
-    using parent::resize;
     using parent::begin;
     using parent::end;
     using parent::cbegin;
     using parent::cend;
     using parent::size;
-    using parent::capacity;
-    using parent::shrink_to_fit;
 
     using level_count_type = std::array<std::size_t, definition::nlevels+1>;
 
@@ -270,13 +265,13 @@ struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_val
         std::size_t wmax=0;
 
         (*this)[0]->setStartRank(0);
-        (*this)[0]->setSlotrank(0);
+        (*this)[0]->setSlotRank(0);
         for(std::size_t i=0; i<size(); ++i)
         {
             if (i > 0)
                 (*this)[i]->setStartRank((*this)[i-1]->startRank()+wmax);
             wmax = (*this)[i]->size();
-            (*this)[i]->setSlotrank(i);
+            (*this)[i]->setSlotRank(i);
         }
     }
 
@@ -285,13 +280,13 @@ struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_val
     {
         std::size_t wmax=0;
         (*this)[0]->setStartRank(0);
-        (*this)[0]->setSlotrank(0);
+        (*this)[0]->setSlotRank(0);
         for(std::size_t i=0; i<size(); ++i)
         {
             if(i>0)
                 (*this)[i]->setStartRank((*this)[i-1]->startRank()+wmax);
             wmax = (*this)[i]->size();
-            (*this)[i]->setSlotrank(i);
+            (*this)[i]->setSlotRank(i);
         }
     }
     //!return maximum size of slots.

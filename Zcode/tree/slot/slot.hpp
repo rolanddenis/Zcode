@@ -349,14 +349,14 @@ public:
     }
 
     //! return slotrank.
-    inline int Slotrank() const
+    inline int slotRank() const
     {
         return slotrank;
     }
 
     //! set the slot rank
     //! \param r
-    inline void setSlotrank(std::size_t r)
+    inline void setSlotRank(std::size_t r)
     {
         slotrank = r;
     }
@@ -403,8 +403,8 @@ std::ostream& operator<<(std::ostream& os, const slot<dim, node_value_type>& sl)
     os << "s2: " << sl.s2 << "\n";
     os << "size: " << sl.size() << "\n";
     os << "capacity: " << sl.capacity() << "\n";
-    os << "startrank: " << sl.Startrank() << "\n";
-    os << "slotrank: " << sl.Slotrank() << "\n";
+    os << "startrank: " << sl.startRank() << "\n";
+    os << "slotrank: " << sl.slotRank() << "\n";
     os << "hasvoidNodes: " << sl.hasvoidNodes() << "\n";
     return os;
 }
