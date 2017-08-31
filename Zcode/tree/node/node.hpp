@@ -7,40 +7,41 @@
 #include <tree/node/definitions.hpp>
 #include <tree/node/direction.hpp>
 
-template <std::size_t Dim, typename node_type=std::size_t>
-struct Node: public definitions<Dim, node_type>
+template <std::size_t Dim, typename Value=std::size_t>
+struct Node: public definitions<Dim, Value>
 {
-    using definitions<Dim, node_type>::dim;    
-    using typename definitions<Dim, node_type>::type;
-    using definitions<Dim, node_type>::size;
-    using definitions<Dim, node_type>::nlevels;
-    using definitions<Dim, node_type>::levelshift;
-    using definitions<Dim, node_type>::levelmask;
-    using definitions<Dim, node_type>::levelzone;
-    using definitions<Dim, node_type>::levelone;
-    using definitions<Dim, node_type>::maskpos;
-    using definitions<Dim, node_type>::voidbit;
-    using definitions<Dim, node_type>::FreeBitsPart;
-    using definitions<Dim, node_type>::partWithoutFreeBits;
-    using definitions<Dim, node_type>::Xbit;
-    using definitions<Dim, node_type>::Ybit;
-    using definitions<Dim, node_type>::Zbit;
-    using definitions<Dim, node_type>::XYZbit;
-    using definitions<Dim, node_type>::XMask;
-    using definitions<Dim, node_type>::YMask;
-    using definitions<Dim, node_type>::ZMask;
-    using definitions<Dim, node_type>::Ones;
-    using definitions<Dim, node_type>::AllOnes;
-    using definitions<Dim, node_type>::treetype;
-    using definitions<Dim, node_type>::TailGen;
-    
-    node_type value=0;
+    using value_type = Value;
+    using definitions<Dim, value_type>::dim;
+    using typename definitions<Dim, value_type>::type;
+    using definitions<Dim, value_type>::size;
+    using definitions<Dim, value_type>::nlevels;
+    using definitions<Dim, value_type>::levelshift;
+    using definitions<Dim, value_type>::levelmask;
+    using definitions<Dim, value_type>::levelzone;
+    using definitions<Dim, value_type>::levelone;
+    using definitions<Dim, value_type>::maskpos;
+    using definitions<Dim, value_type>::voidbit;
+    using definitions<Dim, value_type>::FreeBitsPart;
+    using definitions<Dim, value_type>::partWithoutFreeBits;
+    using definitions<Dim, value_type>::Xbit;
+    using definitions<Dim, value_type>::Ybit;
+    using definitions<Dim, value_type>::Zbit;
+    using definitions<Dim, value_type>::XYZbit;
+    using definitions<Dim, value_type>::XMask;
+    using definitions<Dim, value_type>::YMask;
+    using definitions<Dim, value_type>::ZMask;
+    using definitions<Dim, value_type>::Ones;
+    using definitions<Dim, value_type>::AllOnes;
+    using definitions<Dim, value_type>::treetype;
+    using definitions<Dim, value_type>::TailGen;
+
+    value_type value=0;
 
     Node() = default;
     Node(const Node&) = default;
     //Node(Node&& node) = default;
 
-    Node(node_type i):value{i}{}
+    Node(value_type i):value{i}{}
 
     Node(std::string const &bin_repr)
     {
@@ -51,8 +52,8 @@ struct Node: public definitions<Dim, node_type>
 
     inline auto _get_dec(direction d) const
     {
-        node_type bit = 0;
-        node_type mask = XMask;
+        value_type bit = 0;
+        value_type mask = XMask;
         switch(d)
         {
             case (direction::x):
@@ -62,7 +63,7 @@ struct Node: public definitions<Dim, node_type>
             case (direction::z):
                 bit = Zbit >> dim*level(); mask >>= 2; break;
         }
-        return std::pair<node_type, node_type>{bit, mask};
+        return std::pair<value_type, value_type>{bit, mask};
     }
 
     inline Node plus(direction d, std::size_t stencil=1) const
@@ -73,16 +74,16 @@ struct Node: public definitions<Dim, node_type>
         auto dummy = _get_dec(d);
         auto bit = dummy.first;
         auto mask = dummy.second;
-        node_type tmp = (maskpos - mask);
-        node_type keep = (value&tmp) + (value&levelzone);
+        value_type tmp = (maskpos - mask);
+        value_type keep = (value&tmp) + (value&levelzone);
 
-        node_type dec = 0;
+        value_type dec = 0;
         for (std::size_t i=0; i<stencil; ++i)
             dec = (dec|tmp) + bit;
 
-        node_type move = (value&mask) + (dec|tmp);
+        value_type move = (value&mask) + (dec|tmp);
         // if voidbit is True, keep it !!
-        node_type is_void = ((value&voidbit)||(move&(~maskpos)))? voidbit: 0;
+        value_type is_void = ((value&voidbit)||(move&(~maskpos)))? voidbit: 0;
         return ((move&mask)&AllOnes[level()]) + keep + is_void;
     }
 
@@ -90,38 +91,38 @@ struct Node: public definitions<Dim, node_type>
         auto dummy = _get_dec(d);
         auto bit = dummy.first;
         auto mask = dummy.second;
-        node_type tmp = (maskpos - mask);
-        node_type keep = (value&tmp) + (value&levelzone);
+        value_type tmp = (maskpos - mask);
+        value_type keep = (value&tmp) + (value&levelzone);
 
-        node_type dec = 0;
+        value_type dec = 0;
         for (std::size_t i=0; i<stencil; ++i)
             dec = (dec|tmp) + bit;
 
-        node_type move = (value&mask) - (dec&mask);
+        value_type move = (value&mask) - (dec&mask);
         // if voidbit is True, keep it !!
-        node_type is_void = ((value&voidbit)||(move&(~maskpos)))? voidbit: 0;
+        value_type is_void = ((value&voidbit)||(move&(~maskpos)))? voidbit: 0;
         return ((move&mask)&AllOnes[level()]) + keep + is_void;
     }
 
-    //! test if the node as max coordinate 
+    //! test if the node as max coordinate
     //! \param d: the direction.
-    inline bool is_max(direction d) const 
+    inline bool is_max(direction d) const
     {
         // is_max: all bits set to 1.
-        node_type c = Ones[level()]>>static_cast<node_type>(d);
+        value_type c = Ones[level()]>>static_cast<value_type>(d);
         return (value&c)==c;
     }
-    //! test if the node as min coordinate 
+    //! test if the node as min coordinate
     //! \param  d: direction.
     inline bool is_min(direction d) const
     {
         // is_min: all bits set to 0.
-        node_type c = Ones[level()]>>static_cast<node_type>(d);
+        value_type c = Ones[level()]>>static_cast<value_type>(d);
         return (value&c)==0;
     }
 
     //! get the last level digits of a node in an int (flushed right).
-    //! \param node 
+    //! \param node
     //! \note this can be applied to hashed and non hashed Nodes.
     inline std::size_t lastlevel() const
     {
@@ -155,7 +156,7 @@ struct Node: public definitions<Dim, node_type>
 
     //! set the tag part of a Node
     //! \param N pointer to the Node.
-    //! \param V tag value 
+    //! \param V tag value
     //! \note we do not check V.
     inline void setTags(Node &n) const
     {
@@ -178,23 +179,23 @@ struct Node: public definitions<Dim, node_type>
     }
 
     //! Is a node hashed?
-    inline bool isHashed() const 
+    inline bool isHashed() const
     {
         return value&(XYZbit>>(dim*(level()+1)));
     }
 
     inline Node operator<<(std::size_t i) const
     {
-        return {static_cast<node_type>(value<<i)};
+        return {static_cast<value_type>(value<<i)};
     }
 
-    inline Node& operator+=(Node<dim, node_type> const& node)
+    inline Node& operator+=(Node<dim, value_type> const& node)
     {
         value += node.value;
         return *this;
     }
 
-    // inline Node& operator=(Node<dim, node_type> && node)
+    // inline Node& operator=(Node<dim, value_type> && node)
     // {
     //     value = std::move(node.value);
     //     return *this;
@@ -205,13 +206,13 @@ struct Node: public definitions<Dim, node_type>
         return (value>>i)&1;
     }
 
-    inline Node& operator-=(Node<dim, node_type> const& node)
+    inline Node& operator-=(Node<dim, value_type> const& node)
     {
         value -= node.value;
         return *this;
     }
 
-    inline bool operator&(Node<dim, node_type> const& node) const
+    inline bool operator&(Node<dim, value_type> const& node) const
     {
         return value&node.value;
     }
@@ -229,7 +230,7 @@ std::ostream& operator<<(std::ostream &os, const Node<dim, value_type> &node)
     const std::size_t nlevels = node_type::nlevels;
     const std::size_t levelshift = node_type::levelshift;
 
-    node_type IntOne{1};//!<! 1! 
+    node_type IntOne{1};//!<! 1!
 
     for( int i = size-1; i >= 0; i-- )
     {
