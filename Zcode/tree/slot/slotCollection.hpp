@@ -216,12 +216,13 @@ struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_val
         std::for_each(begin(), end(), [](auto& st){st->clearFreeBits();});
     }
 
-    //! suppress void Nodes, if any.
+    //! Suppress void Nodes, if any.
     //! update the count of leaves.
     inline void compress(node_type val=node_type::voidbit)
     {
         std::for_each(begin(), end(), [&val](auto& st){st->compress(val);});
     }
+
     //! empty all the slots.
     inline void clear()
     {

@@ -188,9 +188,12 @@ TYPED_TEST(SlotTest, compress)
     }
     slot.put(nodes);
     slot.setMark(node_type::voidbit);
+    
     // remove all odd nodes
+    EXPECT_EQ( slot.size(), 10 );
     slot.compress();
     EXPECT_EQ( slot.size(), 5 );
+
     for (std::size_t i=0; i<5; ++i)
     {
         node_type node{static_cast<value_type>(2*i)};

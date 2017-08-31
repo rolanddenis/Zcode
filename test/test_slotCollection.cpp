@@ -104,9 +104,19 @@ TYPED_TEST(SlotCollectionTest, compress)
     using slot_type = slot<dim, value_type>;
     
     slotCollection<dim, value_type> SC{2, 10, 10, 11};
-    SC.push_back(std::make_shared<slot_type>(10));
-   
+    
+    const node_type n1{1};
+    const node_type n2(2 + node_type::voidbit);
+
+    SC.insert(n1);
+    SC.insert(n2);
+
+    EXPECT_EQ( SC.nbNodes(), 2 );
+  
+    SC[0]->setMark( node_type::voidbit ); // TODO: mark update should be triggered in slotCollection.
     SC.compress();
+    
+    EXPECT_EQ( SC.nbNodes(), 1 );
 }
 
 TYPED_TEST(SlotCollectionTest, nbNodes)
