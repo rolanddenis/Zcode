@@ -33,7 +33,8 @@ struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_val
     using parent::capacity;
     using parent::shrink_to_fit;
 
-    std::array<std::size_t, definition::nlevels+1> countlev;//! used to count the Nodes level by level
+    using level_count_type = std::array<std::size_t, definition::nlevels+1>;
+    
     std::size_t breaksize;//!< size of slot which triggers decomposition of a slot.
     std::size_t maxslotsize;//! maximum size of slots stored.
     std::size_t dupsize;//!< size of slot which triggers fusion of two slots.
@@ -143,9 +144,17 @@ struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_val
         return countNodes;
     }
 
-    //! number of Nodes, by level
-    inline std::size_t* nbNodesByLevel() const 
+    //! Returns the number of nodes by level.
+    level_count_type nbNodesByLevel() const 
     {
+        // Initializing level counter.
+        level_count_type countlev;
+        countlev.fill(0);
+
+        for ( auto const& slot_ptr : *this )
+            for ( auto const& node : *slot_ptr )
+                ++countlev[ node.level() ];
+
         return countlev;
     }
 
@@ -257,8 +266,6 @@ struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_val
     //! size of slots;
     inline void finalize()
     {
-        countlev.fill(0);
-
         std::size_t wmax=0;
 
         maxslotsize = 0;
@@ -269,25 +276,9 @@ struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_val
             if (i > 0)
                 (*this)[i]->setStartrank((*this)[i-1]->Startrank()+wmax);
             wmax = (*this)[i]->size();
-            for(std::size_t j=0; j<wmax; ++j)
-                ++countlev[((*this)[i])[j].level()];
             maxslotsize = std::max(maxslotsize, wmax);
             (*this)[i]->setSlotrank(i);
         }
-    }
-
-    //! put the countlevs values... not very clean. See TTree.
-    //! \param p
-    inline void putMaxs(const std::size_t* p)
-    {
-        for(std::size_t i = 0; i < definition::nlevels; ++i)
-            countlev[i] = p[i];
-    }
-    
-    //! get the vector of the number of Nodes by level.
-    inline auto getMaxs() const 
-    {
-        return countlev;
     }
 
     //! compute ranks, maxslotsize...

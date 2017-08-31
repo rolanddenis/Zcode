@@ -173,11 +173,35 @@ TYPED_TEST(SlotCollectionTest, count_with_cache)
     cache_type cache{};
 
     slotCollection<dim, value_type> SC{2, 10, 10, 11};
-    node_type n1{1}, n2{2}, n3{3};
+    const node_type n1{1}, n2{2}, n3{3};
     SC.insert(n1, cache);
     SC.insert(n2, cache);
     
     EXPECT_EQ( SC.count( n1, cache ), 1 );
     EXPECT_EQ( SC.count( n2, cache ), 1 );
     EXPECT_EQ( SC.count( n3, cache ), 0 );
+}
+
+TYPED_TEST(SlotCollectionTest, nbNodesByLevel)
+{
+    auto const dim = TestFixture::dim;
+    using value_type = typename TestFixture::value_type;
+    using node_type = Node<dim, value_type>;
+
+    slotCollection<dim, value_type> SC{2, 10, 10, 11};
+    node_type n1{1}; n1.set_level(0);
+    node_type n2{2}; n2.set_level(1);
+    node_type n3{3}; n3.set_level(1);
+
+    SC.insert(n1);
+    SC.insert(n2);
+    SC.insert(n3);
+    
+    // TODO: adding node in different slots.
+
+    const auto level_count = SC.nbNodesByLevel();
+
+    EXPECT_EQ( level_count[0], 1 );
+    EXPECT_EQ( level_count[1], 2 );
+    EXPECT_EQ( level_count[2], 0 );
 }
