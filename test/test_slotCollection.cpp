@@ -205,3 +205,21 @@ TYPED_TEST(SlotCollectionTest, nbNodesByLevel)
     EXPECT_EQ( level_count[1], 2 );
     EXPECT_EQ( level_count[2], 0 );
 }
+
+TYPED_TEST(SlotCollectionTest, maxSlotSize)
+{
+    auto const dim = TestFixture::dim;
+    using value_type = typename TestFixture::value_type;
+    using node_type = Node<dim, value_type>;
+
+    slotCollection<dim, value_type> SC{2, 10, 10, 11};
+    const node_type n1{1}, n2{2}, n3{3};
+
+    SC.insert(n1);
+    SC.insert(n2);
+    SC.insert(n3);
+    
+    // TODO: adding node in different slots.
+
+    EXPECT_EQ( SC.maxSlotSize(), 3 );
+}
