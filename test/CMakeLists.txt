@@ -9,7 +9,7 @@ if (MSVC AND ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
         string(REPLACE "/MD" "-MT" ${flag_var} "${${flag_var}}")
     endforeach()
 else()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -DNOMINMAX")
 endif()
 
 if(DOWNLOAD_GTEST OR GTEST_SRC_DIR)
