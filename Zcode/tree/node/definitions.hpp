@@ -37,7 +37,7 @@ struct definitions
     //! mask the part used to store level
     static const value_type levelzone = (levelmask)<<levelshift;
     //! mask for  what is used for position:
-    static const value_type maskpos = AllSet2One<dim, dim*nlevels, value_type>::value;
+    static constexpr value_type maskpos = AllSet2One<dim, dim*nlevels, value_type>::value;
 
     //! how many neighbors for one Node (including itself).
     static const int nbneighb = ipow(3, dim);
@@ -78,3 +78,7 @@ constexpr std::array<value_type, definitions<dim, value_type>::nlevels> definiti
 
 template <std::size_t dim, typename value_type>
 constexpr std::array<value_type, ipow(2, dim)> definitions<dim, value_type>::TailGen;
+
+template <std::size_t dim, typename value_type>
+constexpr value_type definitions<dim, value_type>::maskpos;
+

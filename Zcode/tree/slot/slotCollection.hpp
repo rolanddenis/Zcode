@@ -138,21 +138,24 @@ struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_val
     inline void put(node_type x, Cache<dim, node_value_type>& cach)
     {
         node_type xh = x.hash(), xabs = xh&node_type::maskpos;
-        auto stloc = cach.find(xabs);
-        if (stloc == nullptr)
+        auto slot_ptr = cach.find(xabs);
+        
+        // std::shared_ptr convertion to bool returns true iff the shared_ptr is valid.
+        if ( ! slot_ptr )
         {
-            stloc = *this[findSlot(xabs, 0, size()-1)];
-            cach.putSlot(stloc);
+            slot_ptr = (*this)[findSlot(xabs, 0, size()-1)];
+            cach.putSlot(slot_ptr);
         }
-        stloc->put(xh);
+        
+        slot_ptr->put(xh);
     }
 
     //! number of Nodes stored.
     inline std::size_t nbNodes() const 
     {
         std::size_t countNodes = 0;
-        for ( auto const& slot : *this )
-            countNodes += slot.size();
+        for ( auto const& slot_ptr : *this )
+            countNodes += slot_ptr->size();
 
         return countNodes;
     }

@@ -24,7 +24,7 @@ TYPED_TEST(SlotCollectionTest, constructor)
     EXPECT_EQ( SC.capacity(), 2 );
     EXPECT_EQ( SC.size(), 1 );
     node_type n{1};
-    SC[0]->put(n);
+    SC.put(n, SC.cache);
     EXPECT_EQ( SC[0]->capacity(), 10 );
     EXPECT_EQ( SC[0]->size(), 1 );
     // remark: we don't set capacity for slotCollection and slot in the copy constructor
@@ -45,7 +45,7 @@ TYPED_TEST(SlotCollectionTest, clone)
     EXPECT_EQ( SC.capacity(), 2 );
     EXPECT_EQ( SC.size(), 1 );
     node_type n{1};
-    SC[0]->put(n);
+    SC.put(n, SC.cache);
 
     slotCollection<dim, value_type> SCclone{};
     SCclone.clone(SC);
@@ -64,9 +64,9 @@ TYPED_TEST(SlotCollectionTest, swap)
     slotCollection<dim, value_type> SC1{2, 10, 10, 11};
     slotCollection<dim, value_type> SC2{10, 5, 5, 6};
     node_type n1{1}, n2{2};
-    SC1[0]->put(n1);
-    SC1[0]->put(n2);
-    SC2[0]->put(n1);
+    SC1.put(n1, SC1.cache);
+    SC1.put(n2, SC1.cache);
+    SC2.put(n1, SC2.cache);
     
     SC1.swap(SC2);
     EXPECT_EQ( SC1[0]->size(), 1 );
@@ -87,7 +87,7 @@ TYPED_TEST(SlotCollectionTest, findSlot)
     
     slotCollection<dim, value_type> SC{2, 10, 10, 11};
     SC.push_back(std::make_shared<slot_type>(2, 4, 10));
-    SC[0]-> s2 = 2;
+    SC[0]->s2 = 2;
     node_type n1{1}, n2{3}, n3{5};
     EXPECT_EQ(SC.findSlot(n1, 0, SC.size()-1), 0); 
     EXPECT_EQ(SC.findSlot(n2, 0, SC.size()-1), 1); 
@@ -123,4 +123,23 @@ TYPED_TEST(SlotCollectionTest, compress)
     SC.push_back(std::make_shared<slot_type>(10));
    
     SC.compress();
+}
+
+TYPED_TEST(SlotCollectionTest, nbNodes)
+{
+    auto const dim = TestFixture::dim;
+    using value_type = typename TestFixture::value_type;
+    using node_type = Node<dim, value_type>;
+    using slot_type = slot<dim, value_type>;
+    
+    slotCollection<dim, value_type> SC{2, 10, 10, 11};
+    SC.push_back(std::make_shared<slot_type>(10));
+
+    const std::size_t N = 100;
+    EXPECT_EQ( SC.nbNodes(), 0 );
+    for ( std::size_t i = 0; i < N; ++i )
+    {
+        SC.put( node_type(i), SC.cache );
+        EXPECT_EQ( SC.nbNodes(), i+1 );
+    }
 }
