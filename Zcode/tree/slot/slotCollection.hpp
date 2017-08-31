@@ -12,16 +12,12 @@
 
 
 template < std::size_t dim, typename node_value_type >
-struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_value_type> > >,
-                        public definitions<dim, node_value_type>
+struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_value_type> > >
 {
     using slot_type = slot<dim, node_value_type>;
     using node_type = typename slot_type::node_type;
     using definition = definitions<dim, node_value_type>;
 
-    using definition::nlevels;
-    using definition::AllOnes;
-    
     using parent = std::vector<std::shared_ptr<slot_type>>;
     using parent::operator[];
     using parent::push_back;
@@ -37,7 +33,7 @@ struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_val
     using parent::capacity;
     using parent::shrink_to_fit;
 
-    std::array<std::size_t, nlevels+1> countlev;//! used to count the Nodes level by level
+    std::array<std::size_t, definition::nlevels+1> countlev;//! used to count the Nodes level by level
     std::size_t breaksize;//!< size of slot which triggers decomposition of a slot.
     //! cache used to avoid repetitive search of slots.
     Cache<dim, node_value_type> cache;
@@ -65,7 +61,7 @@ struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_val
                    std::size_t _breaksize):
         breaksize{_breaksize},
         dupsize{_dupsize},
-        smax{AllOnes[nlevels-1]}
+        smax{ definition::AllOnes[definition::nlevels-1] }
     {
         reserve(_nslots);
         push_back(std::make_shared<slot_type>(0, smax, _slotsize));
@@ -76,7 +72,7 @@ struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_val
     slotCollection(slotCollection const& SC):
         breaksize{SC.breaksize},
         dupsize{SC.dupsize},
-        smax{AllOnes[nlevels-1]}
+        smax{ definition::AllOnes[definition::nlevels-1] }
     {
         for(std::size_t i=0; i<SC.size(); ++i)
             push_back(std::make_shared<slot_type>(*SC[i]));
@@ -282,7 +278,7 @@ struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_val
     //! \param p
     inline void putMaxs(const std::size_t* p)
     {
-        for(std::size_t i=0; i<nlevels; ++i)
+        for(std::size_t i = 0; i < definition::nlevels; ++i)
             countlev[i] = p[i];
     }
     
