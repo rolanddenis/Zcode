@@ -46,7 +46,7 @@ template<typename Node_type>
 inline bool isAncestor(Node_type A, Node_type X)
 {
     return (A.level()<=X.level())
-        && (A.value&Node_type::maskpos) == (X.value&Node_type::AllOnes[A.level()]);
+        && (A.pos()) == (X.value&Node_type::AllOnes[A.level()]);
 }
 
 //! Do 2 Nodes share the same ancestor of a given level ?

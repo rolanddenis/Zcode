@@ -42,7 +42,6 @@ struct slot: private std::vector< Node<dim, node_value_type> >
 
     static const node_value_type FreeBitsPart = node_type::FreeBitsPart;
     static const node_value_type voidbit = node_type::voidbit;
-    static const node_value_type maskpos = node_type::maskpos;
     static const node_value_type decal = dim*node_type::nlevels;
 
     node_type s1{0}, s2{node_type::AllOnes[node_type::nlevels-1]};
@@ -251,13 +250,13 @@ public:
         for(std::size_t i=0; i<nc-1; ++i)
         {
             slarray[i].insert(slarray[i].begin(), begin()+i*sizec, begin()+(i+1)*sizec);
-            slarray[i].s1 = (*this)[i*sizec].value&maskpos;
-            slarray[i].s2 = (*this)[(i+1)*sizec-1].value&maskpos;
+            slarray[i].s1 = (*this)[i*sizec].pos();
+            slarray[i].s2 = (*this)[(i+1)*sizec-1].pos();
         }
         std::size_t i = nc-1;
         slarray[i].insert(slarray[i].begin(), begin()+i*sizec, end());
-        slarray[i].s1 = (*this)[i*sizec].value&maskpos;
-        slarray[i].s2 = (*this)[size()-1].value&maskpos;
+        slarray[i].s1 = (*this)[i*sizec].pos();
+        slarray[i].s2 = (*this)[size()-1].pos();
         return slarray;
     }
 
@@ -289,7 +288,7 @@ public:
     //! sort by hash function.
     inline void sort()
     {
-        std::sort(begin(), end(), [&](auto &n1, auto &n2){return (n1.value&maskpos)<(n2.value&maskpos);});
+        std::sort(begin(), end(), [&](auto &n1, auto &n2){return n1.pos() < n2.pos();});
     }
 
     //! reallocate to reduce size;

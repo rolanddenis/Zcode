@@ -41,7 +41,7 @@ struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_val
     {
         inline bool operator()(const node_type n1,const node_type n2) const
         {
-            return (n1&node_type::maskpos)<(n2&node_type::maskpos);
+            return n1.pos() < n2.pos();
         }
     };
 
@@ -86,7 +86,7 @@ struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_val
     /// \param cache    an external Cache.
     inline void insert( node_type x, Cache<dim, node_value_type>& cache )
     {
-        const node_type xh = x.hash(), xabs = xh&node_type::maskpos;
+        const node_type xh = x.hash(), xabs = xh.pos();
         auto slot_ptr = cache.find(xabs); // Cache::find returns a shared_ptr.
 
         // std::shared_ptr convertion to bool returns true iff the shared_ptr is valid.
@@ -103,7 +103,7 @@ struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_val
     /// \param x    the node to be inserted.
     inline void insert( node_type x )
     {
-        const node_type xh = x.hash(), xabs = xh&node_type::maskpos;
+        const node_type xh = x.hash(), xabs = xh.pos();
         const auto slot_ptr = (*this)[findSlot(xabs, 0, size()-1)];
         slot_ptr->put(xh);
     }
@@ -137,14 +137,15 @@ struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_val
     //! \param x Node *not* *hashed*
     inline auto ubound(node_type x) const
     {
-        return (*this)[findSlot(x.hash() & node_type::maskpos, 0, size()-1)];
+        return (*this)[findSlot(x.hash().pos(), 0, size()-1)];
     }
 
     //! return a pointer to a slot which *possibly* contains a Node.
     //! \param x Node *hashed*
     inline auto ubound_hashed(node_type x) const
     {
-        return (*this)[findSlot(x & node_type::maskpos, 0, size()-1)];
+        assert( x.isHashed() );
+        return (*this)[findSlot(x.pos(), 0, size()-1)];
     }
 
     //! Given a Node, find his slot.
@@ -180,7 +181,7 @@ struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_val
     ///         this is checked in "xh=hash(x)".
     inline std::size_t count(node_type x, Cache<dim, node_value_type>& cache) const
     {
-        node_type xh = x.hash(), xabs = xh&node_type::maskpos;
+        node_type xh = x.hash(), xabs = xh.pos();
         auto slot_ptr = cache.find(xabs);
 
         if( ! slot_ptr )
@@ -203,7 +204,7 @@ struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_val
     ///         this is checked in "xh=hash(x)".
     inline std::size_t count(node_type x) const
     {
-        node_type xh = x.hash(), xabs = xh&node_type::maskpos;
+        node_type xh = x.hash(), xabs = xh.pos();
         const auto slot_ptr     = (*this)[findSlot(xabs, 0, size()-1)];
         const auto node_it      = slot_ptr->find(xh);
         return node_it == slot_ptr->cend() ? 0 : 1;

@@ -191,7 +191,7 @@ struct Node: public definitions<Dim, Value>
     }
 
     //! Returns z-curve position of this node.
-    inline value_type pos() const
+    inline Node pos() const
     {
         return value & maskpos;
     }
@@ -224,10 +224,6 @@ struct Node: public definitions<Dim, Value>
         return *this;
     }
 
-    inline bool operator&(Node<dim, value_type> const& node) const
-    {
-        return value&node.value;
-    }
 
 };
 
@@ -246,7 +242,7 @@ std::ostream& operator<<(std::ostream &os, const Node<dim, value_type> &node)
 
     for( int i = size-1; i >= 0; i-- )
     {
-        if(node&(IntOne<<i))
+        if(node.value&(IntOne<<i).value)
             s+='1';
         else
             s+='0';
@@ -280,6 +276,12 @@ template <std::size_t dim, typename value_type>
 inline Node<dim, value_type> operator&(Node<dim, value_type> const& node, value_type const& value)
 {
     return {static_cast<value_type>(node.value&value)};
+}
+
+template <std::size_t dim, typename value_type>
+inline Node<dim, value_type> operator&( value_type const& value, Node<dim, value_type> const& node )
+{
+    return {static_cast<value_type>(value&node.value)};
 }
 
 template <std::size_t dim, typename value_type>
