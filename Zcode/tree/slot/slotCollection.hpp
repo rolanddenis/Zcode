@@ -137,15 +137,14 @@ struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_val
     //! \param x Node *not* *hashed*
     inline auto ubound(node_type x) const
     {
-        typename node_type::type maskpos = node_type::maskpos;
-        return (*this)[findSlot(x.hash()&maskpos, 0, size()-1)];
+        return (*this)[findSlot(x.hash() & node_type::maskpos, 0, size()-1)];
     }
+
     //! return a pointer to a slot which *possibly* contains a Node.
     //! \param x Node *hashed*
     inline auto ubound_hashed(node_type x) const
     {
-        typename node_type::type maskpos = node_type::maskpos;
-        return (*this)[findSlot(x&maskpos, 0, size()-1)];
+        return (*this)[findSlot(x & node_type::maskpos, 0, size()-1)];
     }
 
     //! Given a Node, find his slot.
