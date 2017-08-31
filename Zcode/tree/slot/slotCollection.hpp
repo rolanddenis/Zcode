@@ -309,8 +309,10 @@ struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_val
 template<std::size_t dim, typename node_value_type>
 std::ostream& operator<<(std::ostream& os, const slotCollection<dim, node_value_type>& st)
 {
-    os << "slotCollection\n";
-    // os << st.smax << "\n";
-    for_each(st.begin(), st.end(), [](auto &sl){std::cout << *sl.get() << "\n";});
+    using definition = typename slotCollection<dim, node_value_type>::definition;
+
+    os << "slotCollection" << std::endl;;
+    os << definition::AllOnes[definition::nlevels-1] << std::endl;
+    for_each(st.begin(), st.end(), [](auto &sl){std::cout << *sl.get() << std::endl;});
     return os;
 }
