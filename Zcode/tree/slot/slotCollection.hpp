@@ -35,8 +35,6 @@ struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_val
 
     std::array<std::size_t, definition::nlevels+1> countlev;//! used to count the Nodes level by level
     std::size_t breaksize;//!< size of slot which triggers decomposition of a slot.
-    //! cache used to avoid repetitive search of slots.
-    Cache<dim, node_value_type> cache;
     std::size_t maxslotsize;//! maximum size of slots stored.
     std::size_t dupsize;//!< size of slot which triggers fusion of two slots.
     node_type smax; //!< max. value of hash function for Nodes.
@@ -65,7 +63,6 @@ struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_val
     {
         reserve(_nslots);
         push_back(std::make_shared<slot_type>(0, smax, _slotsize));
-        cache.putSlot((*this)[0]);
     }
 
     // remark: this copy constructor doesn't set the same capacity of the copied slotCollection
@@ -76,7 +73,6 @@ struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_val
     {
         for(std::size_t i=0; i<SC.size(); ++i)
             push_back(std::make_shared<slot_type>(*SC[i]));
-        cache.putSlot((*this)[0]);
     }
     
     //! An other "copy init". Here we put the Nodes of each slot in a global
@@ -97,52 +93,43 @@ struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_val
         smax=C.smax;
         for(std::size_t i=0; i<C.size(); ++i)
             push_back(std::make_shared<slot_type>(C[i]->s1, C[i]->s2, C[i]->size()*node_type::treetype));
-        reinitCache();
     }
 
-    //! swap content of two SlotCollections:
-    //! \param C "partner" SlotCollection.
-    inline void swap(slotCollection& C)
-    {
-        // FIX ?? : do we have to also swap the capacity ?
-        std::swap(*this, C);
-        reinitCache(); 
-        C.reinitCache();
-    }
-
-    //---------------------------------------------------------------------
-    //! Reinitialise cache when modifications make it invalid.
-    inline void reinitCache()
-    {
-        cache.putSlot((*this)[0]);
-    }
-
-    //! is a Node abscissa in the interval [s1,s2[ ?
-    // \param s1
-    // \param s2
-    // \param x Node to check.
-    //! \note x must be *not* hashed.
+    /// Is a Node abscissa in the interval [s1,s2[ ?
+    /// \param s1
+    /// \param s2
+    /// \param x Node to check.
+    /// \note x must be *not* hashed.
     inline bool inInterval(node_type s1, node_type s2, node_type x) const
     {
         node_type xabs = x.hash()&node_type::maskpos;
         return (s1<=xabs) && (s2>xabs);
     }
 
-    //! store one node.
-    //! \param x Node
-    //! \param cach this version  uses an external Cache (this is thread safe)
-    inline void put(node_type x, Cache<dim, node_value_type>& cach)
+    /// Store one node using a cache.
+    /// \param x        the node to be inserted.
+    /// \param cache    an external Cache.
+    inline void insert( node_type x, Cache<dim, node_value_type>& cache )
     {
-        node_type xh = x.hash(), xabs = xh&node_type::maskpos;
-        auto slot_ptr = cach.find(xabs);
+        const node_type xh = x.hash(), xabs = xh&node_type::maskpos;
+        auto slot_ptr = cache.find(xabs); // Cache::find returns a shared_ptr.
         
         // std::shared_ptr convertion to bool returns true iff the shared_ptr is valid.
         if ( ! slot_ptr )
         {
             slot_ptr = (*this)[findSlot(xabs, 0, size()-1)];
-            cach.putSlot(slot_ptr);
+            cache.putSlot(slot_ptr); // Updating the cache with the current request.
         }
         
+        slot_ptr->put(xh);
+    }
+    
+    /// Store one node.
+    /// \param x    the node to be inserted.
+    inline void insert( node_type x )
+    {
+        const node_type xh = x.hash(), xabs = xh&node_type::maskpos;
+        const auto slot_ptr = (*this)[findSlot(xabs, 0, size()-1)];
         slot_ptr->put(xh);
     }
 
@@ -202,23 +189,37 @@ struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_val
         return left;
     }
 
-    //! find a Node.
-    //! \param x Node non hashed.
-    //! \param cach cache updated.
-    //! \note we do not directly check if the Node is really non hashed, but
-    // this is checked in "xh=hash(x)".
-    inline bool find(node_type x, Cache<dim, node_value_type>& cach) const
+    /// Test if a Node exists within this slotCollection, using a cache.
+    /// \param x    Node non hashed.
+    /// \param cach cache updated.
+    /// \returns the number of corresponding found node (either 0 or 1).
+    /// \note we do not directly check if the Node is really non hashed, but
+    ///         this is checked in "xh=hash(x)".
+    inline std::size_t count(node_type x, Cache<dim, node_value_type>& cache) const
     {
         node_type xh = x.hash(), xabs = xh&node_type::maskpos;
-        auto stloc = cach.find(xabs);
+        auto stloc = cache.find(xabs);
         if(stloc==nullptr)
         {
             stloc = *this[findSlot(xabs, 0, size()-1)];
-            cach.putSlot(stloc);
+            cache.putSlot(stloc);
         }
         std::size_t pos = stloc->find(xh);
-        cach.setrankInSlot(pos);
-        return pos != -1;
+        cache.setrankInSlot(pos);
+        return pos != -1 ? 1 : 0;
+    }
+
+    /// Test if a Node exists within this slotCollection.
+    /// \param x Node non hashed.
+    /// \returns the number of corresponding found node (either 0 or 1).
+    /// \note we do not directly check if the Node is really non hashed, but
+    ///         this is checked in "xh=hash(x)".
+    inline std::size_t count(node_type x) const
+    {
+        node_type xh = x.hash(), xabs = xh&node_type::maskpos;
+        const auto slot_ptr     = *this[findSlot(xabs, 0, size()-1)];
+        const std::size_t pos   = slot_ptr->find(xh);
+        return pos != -1 ? 1 : 0;
     }
 
     //! remove all free bits from all nodes.
@@ -253,9 +254,6 @@ struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_val
     inline void finalize()
     {
         countlev.fill(0);
-
-        //cache is probably invalid; reinitialize it.
-        reinitCache();
 
         std::size_t wmax=0;
 

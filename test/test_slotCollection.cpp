@@ -3,6 +3,8 @@
 #include <tree/slot/slotCollection.hpp>
 #include <tree/node/node.hpp>
 
+#include <utility>
+
 #define DIM_GROUP(T) std::tuple<std::integral_constant<std::size_t, 1>, T>, std::tuple<std::integral_constant<std::size_t, 2>, T>, std::tuple<std::integral_constant<std::size_t, 3>, T>
 
 template <typename T>
@@ -24,7 +26,7 @@ TYPED_TEST(SlotCollectionTest, constructor)
     EXPECT_EQ( SC.capacity(), 2 );
     EXPECT_EQ( SC.size(), 1 );
     node_type n{1};
-    SC.put(n, SC.cache);
+    SC.insert(n);
     EXPECT_EQ( SC[0]->capacity(), 10 );
     EXPECT_EQ( SC[0]->size(), 1 );
     // remark: we don't set capacity for slotCollection and slot in the copy constructor
@@ -45,7 +47,7 @@ TYPED_TEST(SlotCollectionTest, clone)
     EXPECT_EQ( SC.capacity(), 2 );
     EXPECT_EQ( SC.size(), 1 );
     node_type n{1};
-    SC.put(n, SC.cache);
+    SC.insert(n);
 
     slotCollection<dim, value_type> SCclone{};
     SCclone.clone(SC);
@@ -64,11 +66,11 @@ TYPED_TEST(SlotCollectionTest, swap)
     slotCollection<dim, value_type> SC1{2, 10, 10, 11};
     slotCollection<dim, value_type> SC2{10, 5, 5, 6};
     node_type n1{1}, n2{2};
-    SC1.put(n1, SC1.cache);
-    SC1.put(n2, SC1.cache);
-    SC2.put(n1, SC2.cache);
+    SC1.insert(n1);
+    SC1.insert(n2);
+    SC2.insert(n1);
     
-    SC1.swap(SC2);
+    std::swap(SC1, SC2);
     EXPECT_EQ( SC1[0]->size(), 1 );
     EXPECT_EQ( SC1.dupsize, 5 );
     EXPECT_EQ( SC1.breaksize, 6 );
@@ -139,7 +141,7 @@ TYPED_TEST(SlotCollectionTest, nbNodes)
     EXPECT_EQ( SC.nbNodes(), 0 );
     for ( std::size_t i = 0; i < N; ++i )
     {
-        SC.put( node_type(i), SC.cache );
+        SC.insert( node_type(i) );
         EXPECT_EQ( SC.nbNodes(), i+1 );
     }
 }
