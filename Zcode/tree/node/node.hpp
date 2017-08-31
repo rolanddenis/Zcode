@@ -184,6 +184,18 @@ struct Node: public definitions<Dim, Value>
         return value&(XYZbit>>(dim*(level()+1)));
     }
 
+    //! Suppress all bits used to mark something.
+    inline void clearFreeBits()
+    {
+        value &= ~FreeBitsPart;
+    }
+
+    //! Returns z-curve position of this node.
+    inline value_type pos() const
+    {
+        return value & maskpos;
+    }
+
     inline Node operator<<(std::size_t i) const
     {
         return {static_cast<value_type>(value<<i)};

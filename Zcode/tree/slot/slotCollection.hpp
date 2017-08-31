@@ -173,8 +173,8 @@ struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_val
     }
 
     /// Test if a Node exists within this slotCollection, using a cache.
-    /// \param x    Node non hashed.
-    /// \param cach cache updated.
+    /// \param x        Node non hashed.
+    /// \param[in,out] cache    Used cache.
     /// \returns the number of corresponding found node (either 0 or 1).
     /// \note we do not directly check if the Node is really non hashed, but
     ///         this is checked in "xh=hash(x)".
@@ -209,10 +209,10 @@ struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_val
         return node_it == slot_ptr->cend() ? 0 : 1;
     }
 
-    //! remove all free bits from all nodes.
-    inline void forgetFreeBits()
+    //! Clear all free bits from all nodes.
+    inline void clearFreeBits()
     {
-        std::for_each(begin(), end(), [](auto& st){st->forgetFreeBits();});
+        std::for_each(begin(), end(), [](auto& st){st->clearFreeBits();});
     }
 
     //! suppress void Nodes, if any.

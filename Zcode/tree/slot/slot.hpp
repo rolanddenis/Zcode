@@ -307,10 +307,10 @@ public:
         return ret;
     }
 
-    //! suppress all bits used to mark something (except voidbit).
-    inline void forgetFreeBits()
+    //! Suppress all bits used to mark something.
+    inline void clearFreeBits()
     {
-        std::for_each(begin(), end(), [&](auto &n){n.value&=(~FreeBitsPart);});
+        std::for_each(begin(), end(), [](auto &n){ n.clearFreeBits(); });
     }
 
     //! suppress ex-aequo.

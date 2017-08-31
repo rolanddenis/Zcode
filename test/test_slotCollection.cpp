@@ -227,3 +227,22 @@ TYPED_TEST(SlotCollectionTest, copyInArray)
     EXPECT_EQ( array[1], n2.hash() );
     EXPECT_EQ( array[2], n3.hash() );
 }
+
+TYPED_TEST(SlotCollectionTest, clearFreeBits)
+{
+    auto const dim = TestFixture::dim;
+    using value_type = typename TestFixture::value_type;
+    using node_type = Node<dim, value_type>;
+
+    slotCollection<dim, value_type> SC{2, 10, 10, 11};
+    const node_type n1{1};
+    const node_type n2(n1.value + node_type::voidbit);
+
+    SC.insert(n2);
+
+    EXPECT_NE( (*SC[0])[0].value, n1.hash().value );
+
+    SC.clearFreeBits();
+    
+    EXPECT_EQ( (*SC[0])[0].value, n1.hash().value );
+}
