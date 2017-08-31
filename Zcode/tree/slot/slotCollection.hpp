@@ -28,6 +28,7 @@ struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_val
     using parent::cbegin;
     using parent::cend;
     using parent::size;
+    using parent::capacity;
 
     using level_count_type = std::array<std::size_t, definition::nlevels+1>;
 
@@ -78,17 +79,6 @@ struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_val
     {
         assert( array.size() == nbNodes() );
         tbb::parallel_for_each(cbegin(), cend(), [&array](auto &sl){ sl->copyInArray(array.data()+sl->startRank()); });
-    }
-
-    //! make a "clone", ie copy all, but not the Nodes!
-    // \parameter  C SlotCollection to be "cloned"
-    inline void clone(const slotCollection& C)
-    {
-        slot_min_size = C.slot_min_size;
-        slot_max_size = C.slot_max_size;
-
-        for ( std::size_t i = 0; i < C.size(); ++i)
-            push_back(std::make_shared<slot_type>(C[i]->s1, C[i]->s2, C[i]->size()*node_type::treetype));
     }
 
     /// Is a Node abscissa in the interval [s1,s2[ ?

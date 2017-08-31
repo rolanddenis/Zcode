@@ -39,26 +39,6 @@ TYPED_TEST(SlotCollectionTest, constructor)
     EXPECT_EQ( SCcopy[0]->size(), 1 );
 }
 
-TYPED_TEST(SlotCollectionTest, clone)
-{
-    auto const dim = TestFixture::dim;
-    using value_type = typename TestFixture::value_type;
-    using node_type = Node<dim, value_type>;
-
-    slotCollection<dim, value_type> SC{2, 10, 10, 10};
-    EXPECT_EQ( SC.capacity(), 2 );
-    EXPECT_EQ( SC.size(), 1 );
-    node_type n{1};
-    SC.insert(n);
-
-    slotCollection<dim, value_type> SCclone{};
-    SCclone.clone(SC);
-    EXPECT_EQ( SCclone.capacity(), 1 );
-    EXPECT_EQ( SCclone.size(), 1 );
-    EXPECT_EQ( SCclone[0]->capacity(), SC[0]->size()*node_type::treetype );
-    EXPECT_EQ( SCclone[0]->size(), 0 );
-}
-
 TYPED_TEST(SlotCollectionTest, swap)
 {
     auto const dim = TestFixture::dim;
