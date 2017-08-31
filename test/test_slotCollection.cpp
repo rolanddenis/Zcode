@@ -256,3 +256,25 @@ TYPED_TEST(SlotCollectionTest, clearFreeBits)
     
     EXPECT_EQ( (*SC[0])[0].value, n1.hash().value );
 }
+
+TYPED_TEST(SlotCollectionTest, clear)
+{
+    auto const dim = TestFixture::dim;
+    using value_type = typename TestFixture::value_type;
+    using node_type = Node<dim, value_type>;
+    using slot_type = slot<dim, value_type>;
+    
+    slotCollection<dim, value_type> SC{2, 10, 10, 11};
+    
+    const node_type n1{1}, n2{2}, n3{3};
+
+    SC.insert(n1);
+    SC.insert(n2);
+    SC.insert(n3);
+
+    EXPECT_EQ( SC.nbNodes(), 3 );
+  
+    SC.clear();
+    
+    EXPECT_EQ( SC.nbNodes(), 0 );
+}
