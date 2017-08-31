@@ -73,12 +73,12 @@ TYPED_TEST(SlotCollectionTest, swap)
     
     std::swap(SC1, SC2);
     EXPECT_EQ( SC1[0]->size(), 1 );
-    EXPECT_EQ( SC1.dupsize, 5 );
-    EXPECT_EQ( SC1.breaksize, 6 );
+    EXPECT_EQ( SC1.slot_min_size, 5 );
+    EXPECT_EQ( SC1.slot_max_size, 6 );
 
     EXPECT_EQ( SC2[0]->size(), 2 );
-    EXPECT_EQ( SC2.dupsize, 10 );
-    EXPECT_EQ( SC2.breaksize, 11 );
+    EXPECT_EQ( SC2.slot_min_size, 10 );
+    EXPECT_EQ( SC2.slot_max_size, 11 );
 }
 
 TYPED_TEST(SlotCollectionTest, findSlot)

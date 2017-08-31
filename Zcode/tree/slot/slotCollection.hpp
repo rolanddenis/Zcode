@@ -1,4 +1,5 @@
 #pragma once
+
 #include <algorithm>
 #include <array>
 #include <vector>
@@ -35,8 +36,8 @@ struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_val
 
     using level_count_type = std::array<std::size_t, definition::nlevels+1>;
 
-    std::size_t breaksize;  //!< size of slot which triggers decomposition of a slot.
-    std::size_t dupsize;    //!< size of slot which triggers fusion of two slots.
+    std::size_t slot_max_size;  //!< size of slot which triggers decomposition of a slot.
+    std::size_t slot_min_size;    //!< size of slot which triggers fusion of two slots.
     node_type smax;         //!< max. value of hash function for Nodes.
 
     //! define order on the Nodes. We use the Peano-Hilbert curve for indexation,
@@ -55,10 +56,10 @@ struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_val
 
     slotCollection(std::size_t _nslots,
                    std::size_t _slotsize,
-                   std::size_t _dupsize,
-                   std::size_t _breaksize):
-        breaksize{_breaksize},
-        dupsize{_dupsize},
+                   std::size_t _slot_min_size,
+                   std::size_t _slot_max_size):
+        slot_max_size{_slot_max_size},
+        slot_min_size{_slot_min_size},
         smax{ definition::AllOnes[definition::nlevels-1] }
     {
         reserve(_nslots);
@@ -67,8 +68,8 @@ struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_val
 
     // remark: this copy constructor doesn't set the same capacity of the copied slotCollection
     slotCollection(slotCollection const& SC):
-        breaksize{SC.breaksize},
-        dupsize{SC.dupsize},
+        slot_max_size{SC.slot_max_size},
+        slot_min_size{SC.slot_min_size},
         smax{ definition::AllOnes[definition::nlevels-1] }
     {
         for(std::size_t i=0; i<SC.size(); ++i)
@@ -89,7 +90,7 @@ struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_val
     // \parameter  C SlotCollection to be "cloned"
     inline void clone(const slotCollection& C)
     {
-        dupsize=C.dupsize; breaksize=C.breaksize;
+        slot_min_size=C.slot_min_size; slot_max_size=C.slot_max_size;
         smax=C.smax;
         for(std::size_t i=0; i<C.size(); ++i)
             push_back(std::make_shared<slot_type>(C[i]->s1, C[i]->s2, C[i]->size()*node_type::treetype));
