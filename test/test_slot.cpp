@@ -535,7 +535,7 @@ TYPED_TEST(SlotTest, dumprestore)
     for (std::size_t i=0; i<10; ++i)
         nodes[i] = i;
     slot_dump.put(nodes);
-    slot_dump.setStartrank(2);
+    slot_dump.setStartRank(2);
 
     std::ofstream file_out;
     file_out.open(filename.c_str(), std::ios::out|std::ios::binary );     
@@ -550,7 +550,7 @@ TYPED_TEST(SlotTest, dumprestore)
 
     EXPECT_EQ( slot_restore.s1, s1 );
     EXPECT_EQ( slot_restore.s2, s2 );
-    EXPECT_EQ( slot_restore.Startrank(), 2 );
+    EXPECT_EQ( slot_restore.startRank(), 2 );
     for (std::size_t i=0; i<10; ++i)
     {
         node_type node{static_cast<value_type>(i)};

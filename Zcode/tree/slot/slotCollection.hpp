@@ -40,18 +40,19 @@ struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_val
     std::size_t slot_min_size;    //!< size of slot which triggers fusion of two slots.
 
     //! define order on the Nodes. We use the Peano-Hilbert curve for indexation,
-      //! and thus, we must suppress all what is not position.
+    //! and thus, we must suppress all what is not position.
     struct ltNode
     {
         inline bool operator()(const node_type n1,const node_type n2) const
         {
-        return (n1&node_type::maskpos)<(n2&node_type::maskpos);
+            return (n1&node_type::maskpos)<(n2&node_type::maskpos);
         }
     };
 
-    using setNode = std::set<node_type, ltNode>;
+    using SetNode = std::set<node_type, ltNode>;
 
     slotCollection() = default;
+    //slotCollection(slotCollection && SC ) = delete; // TODO ?
 
     slotCollection(std::size_t _nslots,
                    std::size_t _slotsize,
@@ -69,8 +70,8 @@ struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_val
         slot_max_size{SC.slot_max_size},
         slot_min_size{SC.slot_min_size}
     {
-        for(std::size_t i=0; i<SC.size(); ++i)
-            push_back(std::make_shared<slot_type>(*SC[i]));
+        for ( auto const& slot_ptr : SC )
+            push_back( std::make_shared<slot_type>( *slot_ptr ) );
     }
 
     //! An other "copy init". Here we put the Nodes of each slot in a global
@@ -80,7 +81,8 @@ struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_val
     //! \param G global array.
     void copyInArray(std::vector<node_type>& array)
     {
-        tbb::parallel_for_each(cbegin(), cend(), [&array](auto &sl){sl->copyInArray(array.data()+sl->Startrank());});
+        assert( array.size() == nbNodes() );
+        tbb::parallel_for_each(cbegin(), cend(), [&array](auto &sl){ sl->copyInArray(array.data()+sl->startRank()); });
     }
 
     //! make a "clone", ie copy all, but not the Nodes!
@@ -89,7 +91,7 @@ struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_val
     {
         slot_min_size = C.slot_min_size;
         slot_max_size = C.slot_max_size;
-        
+
         for ( std::size_t i = 0; i < C.size(); ++i)
             push_back(std::make_shared<slot_type>(C[i]->s1, C[i]->s2, C[i]->size()*node_type::treetype));
     }
@@ -254,7 +256,7 @@ struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_val
 
     //! make a copy (in a set) of the Nodes.
     //! \param setN  the set.
-    inline void makeExtern(setNode& setN)
+    inline void makeExtern(SetNode& setN)
     {
         for (auto&st: this)
             for(std::size_t i=0; i<st->size(); ++i)
@@ -267,12 +269,12 @@ struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_val
     {
         std::size_t wmax=0;
 
-        (*this)[0]->setStartrank(0);
+        (*this)[0]->setStartRank(0);
         (*this)[0]->setSlotrank(0);
         for(std::size_t i=0; i<size(); ++i)
         {
             if (i > 0)
-                (*this)[i]->setStartrank((*this)[i-1]->Startrank()+wmax);
+                (*this)[i]->setStartRank((*this)[i-1]->startRank()+wmax);
             wmax = (*this)[i]->size();
             (*this)[i]->setSlotrank(i);
         }
@@ -282,12 +284,12 @@ struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_val
     inline void relink()
     {
         std::size_t wmax=0;
-        (*this)[0]->setStartrank(0);
+        (*this)[0]->setStartRank(0);
         (*this)[0]->setSlotrank(0);
         for(std::size_t i=0; i<size(); ++i)
         {
             if(i>0)
-                (*this)[i]->setStartrank((*this)[i-1]->Startrank()+wmax);
+                (*this)[i]->setStartRank((*this)[i-1]->startRank()+wmax);
             wmax = (*this)[i]->size();
             (*this)[i]->setSlotrank(i);
         }

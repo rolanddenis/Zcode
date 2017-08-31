@@ -21,7 +21,7 @@ void myreplace_if(ForwardIt first, ForwardIt last,
 ///
 /// \brief slot structures, store a set of Nodes.
 ////////////////////////////////////////////////////////////////////////////
-template < std::size_t dim, typename node_value_type = std::size_t > 
+template < std::size_t dim, typename node_value_type = std::size_t >
 struct slot: private std::vector< Node<dim, node_value_type> >
 {
     using node_type = Node<dim, node_value_type>;
@@ -48,8 +48,8 @@ struct slot: private std::vector< Node<dim, node_value_type> >
     node_type s1{0}, s2{node_type::AllOnes[node_type::nlevels-1]};
 
 private:
-    std::size_t slotrank;//!<rank in a collection of slots.
-    std::size_t startrank;//!< used to define a rank for all Nodes, in a slot collection.
+    std::size_t slotrank;       //!< rank in a collection of slots.
+    std::size_t startrank = 0;  //!< used to define a rank for all Nodes, in a slot collection.
     mutable unsigned char slotMark=0; // to put various marks on the slot.
     bool vCanBeDeleted=true;
 
@@ -71,7 +71,7 @@ public:
     inline void copyInArray(node_type* array) const
     {
         for(std::size_t i=0; i<size(); i++)
-            array[i] = *this[i]; 
+            array[i] = (*this)[i];
     }
 
     //! find a Node.
@@ -100,7 +100,7 @@ public:
     }
 
     //! position of the last entered Node in v[]
-    inline int lastPos() const 
+    inline int lastPos() const
     {
         return size()-1;
     }
@@ -130,7 +130,7 @@ public:
     //! compress: ie, supress void Nodes with given values
     //! \param N  test value
     //! \param M  test value
-    //! \note  a Node K are supressed iff K&N==N *or* K&M==M 
+    //! \note  a Node K are supressed iff K&N==N *or* K&M==M
     inline void compress(node_type N, node_type M)
     {
         const unsigned char n1 =(N.value&FreeBitsPart)>>decal;
@@ -175,7 +175,7 @@ public:
         if(slotMark&amask)
         {
             slotMark -= amask;
-            if(!(slotMark&bmask)) 
+            if(!(slotMark&bmask))
                 slotMark += bmask;
             myreplace_if(begin(), end(), [&](auto &n){return n.value&a.value;}, [&](auto &n){n.value += -a.value+b.value;});
         }
@@ -187,7 +187,7 @@ public:
     inline void unsetMark(node_type N)
     {
         const unsigned char mask = (N.value&FreeBitsPart)>>decal;
-        if(slotMark&mask) 
+        if(slotMark&mask)
             slotMark -= mask;
     }
 
@@ -201,7 +201,7 @@ public:
     }
 
     //! does this slot contains void Nodes ?
-    inline bool hasvoidNodes() const 
+    inline bool hasvoidNodes() const
     {
         return slotMark&(voidbit>>decal);
     }
@@ -234,7 +234,7 @@ public:
     inline void empty()
     {
         resize(0);
-    }    
+    }
 
     //! cut the slot in nc slots.
     //! \note sizes of the resulting slots are not garanted to be equal.
@@ -263,7 +263,7 @@ public:
 
     //! cut this slot in 2 slots, at position pos, and then shrink it.
     //! the returned slot is the first part containing v[0,pos[
-    //! \param pos 
+    //! \param pos
     //! \param s2new value for s2 of the *new* slot, and s1 of this slot.
     //! \note we do not check that pos is correct, except if DEBUG is set.
     //! \note for s2new: position part only; tested only if DEBUG set.
@@ -320,7 +320,7 @@ public:
         auto last = std::unique(begin(), end());
         resize(std::distance(begin(), last));
     }
-    
+
     //!test if all nodes have their abscissa between s1 and s2.
     //!\param throwexept throw an exception if true.
     inline bool testWellFormed(bool throwexept=true) const
@@ -336,24 +336,24 @@ public:
         return (index == end())? false: true;
     }
 
-    inline int Startrank() const 
+    inline int startRank() const
     {
         return startrank;
     }
-    
+
     //! set startrank
     //! \param r
-    inline void setStartrank(std::size_t r) 
+    inline void setStartRank(std::size_t r)
     {
         startrank = r;
     }
 
     //! return slotrank.
-    inline int Slotrank() const 
+    inline int Slotrank() const
     {
         return slotrank;
     }
-    
+
     //! set the slot rank
     //! \param r
     inline void setSlotrank(std::size_t r)
@@ -366,7 +366,7 @@ public:
     void dump(std::ofstream& f)
     {
         f << size() << "\n";
-        f << s2.value << "\n"; 
+        f << s2.value << "\n";
         f << s1.value << "\n";
         f << startrank << "\n";
         for_each(cbegin(), cend(), [&](auto &n){f << n.value << "\n";});
@@ -376,15 +376,15 @@ public:
     //! \param file the file to restore from.
     void restore(std::ifstream& f)
     {
-        std::size_t ssize; 
+        std::size_t ssize;
         node_value_type ss1;
         node_value_type ss2;
         f >> ssize;
-        f >> ss2; 
-        f >> ss1; 
+        f >> ss2;
+        f >> ss1;
         f >> startrank;
-        s1 = ss1; 
-        s2 = ss2; 
+        s1 = ss1;
+        s2 = ss2;
         for(std::size_t j=0; j<ssize; j++)
         {
             node_value_type N;
@@ -392,7 +392,7 @@ public:
             put(node_type{N});
         }
     }
-    
+
 };
 
 template<std::size_t dim, typename node_value_type>

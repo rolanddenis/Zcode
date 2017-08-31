@@ -5,6 +5,7 @@
 #include <tree/slot/cache.hpp>
 
 #include <utility>
+#include <vector>
 
 #define DIM_GROUP(T) std::tuple<std::integral_constant<std::size_t, 1>, T>, std::tuple<std::integral_constant<std::size_t, 2>, T>, std::tuple<std::integral_constant<std::size_t, 3>, T>
 
@@ -222,4 +223,27 @@ TYPED_TEST(SlotCollectionTest, maxSlotSize)
     // TODO: adding node in different slots.
 
     EXPECT_EQ( SC.maxSlotSize(), 3 );
+}
+
+TYPED_TEST(SlotCollectionTest, copyInArray)
+{
+    auto const dim = TestFixture::dim;
+    using value_type = typename TestFixture::value_type;
+    using node_type = Node<dim, value_type>;
+
+    slotCollection<dim, value_type> SC{2, 10, 10, 11};
+    const node_type n1{1}, n2{2}, n3{3};
+
+    SC.insert(n1);
+    SC.insert(n2);
+    SC.insert(n3);
+    
+    // TODO: adding node in different slots.
+    
+    std::vector<node_type> array( 3 );
+    SC.copyInArray( array );
+
+    EXPECT_EQ( array[0], n1.hash() );
+    EXPECT_EQ( array[1], n2.hash() );
+    EXPECT_EQ( array[2], n3.hash() );
 }
