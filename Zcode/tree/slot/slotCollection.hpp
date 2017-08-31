@@ -38,7 +38,6 @@ struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_val
 
     std::size_t slot_max_size;  //!< size of slot which triggers decomposition of a slot.
     std::size_t slot_min_size;    //!< size of slot which triggers fusion of two slots.
-    node_type smax;         //!< max. value of hash function for Nodes.
 
     //! define order on the Nodes. We use the Peano-Hilbert curve for indexation,
       //! and thus, we must suppress all what is not position.
@@ -59,18 +58,16 @@ struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_val
                    std::size_t _slot_min_size,
                    std::size_t _slot_max_size):
         slot_max_size{_slot_max_size},
-        slot_min_size{_slot_min_size},
-        smax{ definition::AllOnes[definition::nlevels-1] }
+        slot_min_size{_slot_min_size}
     {
         reserve(_nslots);
-        push_back(std::make_shared<slot_type>(0, smax, _slotsize));
+        push_back(std::make_shared<slot_type>(0, definition::AllOnes[definition::nlevels-1], _slotsize));
     }
 
     // remark: this copy constructor doesn't set the same capacity of the copied slotCollection
     slotCollection(slotCollection const& SC):
         slot_max_size{SC.slot_max_size},
-        slot_min_size{SC.slot_min_size},
-        smax{ definition::AllOnes[definition::nlevels-1] }
+        slot_min_size{SC.slot_min_size}
     {
         for(std::size_t i=0; i<SC.size(); ++i)
             push_back(std::make_shared<slot_type>(*SC[i]));
@@ -90,9 +87,10 @@ struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_val
     // \parameter  C SlotCollection to be "cloned"
     inline void clone(const slotCollection& C)
     {
-        slot_min_size=C.slot_min_size; slot_max_size=C.slot_max_size;
-        smax=C.smax;
-        for(std::size_t i=0; i<C.size(); ++i)
+        slot_min_size = C.slot_min_size;
+        slot_max_size = C.slot_max_size;
+        
+        for ( std::size_t i = 0; i < C.size(); ++i)
             push_back(std::make_shared<slot_type>(C[i]->s1, C[i]->s2, C[i]->size()*node_type::treetype));
     }
 
@@ -312,7 +310,7 @@ template<std::size_t dim, typename node_value_type>
 std::ostream& operator<<(std::ostream& os, const slotCollection<dim, node_value_type>& st)
 {
     os << "slotCollection\n";
-    os << st.smax << "\n";
+    // os << st.smax << "\n";
     for_each(st.begin(), st.end(), [](auto &sl){std::cout << *sl.get() << "\n";});
     return os;
 }
