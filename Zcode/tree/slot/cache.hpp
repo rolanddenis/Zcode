@@ -15,8 +15,8 @@ struct Cache
     Cache(const Cache&) = default;
     
     mutable std::size_t current, newest;
-    std::array<slot_weak_type, size> st; 
-    std::array<std::size_t, size> pos;//!< last position found by SlotCollection::find() 
+    std::array<slot_weak_type, size>    st; 
+    std::array<std::size_t, size>       pos;    //!< Last node position found by SlotCollection::find() 
     //ZZ! pos is *not* initialized by SlotCollection::put !! use
     // this->getslot()->lastPos() for this. !!!
 
@@ -33,11 +33,13 @@ struct Cache
     inline slot_shared_type find(node_type hashN) const
     {
         const auto slot_it = std::find_if(st.cbegin(), st.cend(), [&](auto &n){ auto slot = n.lock(); return ( slot && hashN >= slot->s1 && hashN < slot->s2 ); });
-
         if ( slot_it != st.cend() )
+        {
+            current = std::distance( st.cbegin(), slot_it );
             return slot_it->lock();
-        else
-            return nullptr;
+        }
+        
+        return nullptr;
     }
 
     //! return a reference to the Node pointed.

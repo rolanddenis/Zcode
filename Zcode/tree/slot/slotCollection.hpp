@@ -198,15 +198,19 @@ struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_val
     inline std::size_t count(node_type x, Cache<dim, node_value_type>& cache) const
     {
         node_type xh = x.hash(), xabs = xh&node_type::maskpos;
-        auto stloc = cache.find(xabs);
-        if(stloc==nullptr)
+        auto slot_ptr = cache.find(xabs);
+
+        if( ! slot_ptr )
         {
-            stloc = *this[findSlot(xabs, 0, size()-1)];
-            cache.putSlot(stloc);
+            slot_ptr = (*this)[findSlot(xabs, 0, size()-1)];
+            cache.putSlot(slot_ptr);
         }
-        std::size_t pos = stloc->find(xh);
-        cache.setrankInSlot(pos);
-        return pos != -1 ? 1 : 0;
+
+        const auto node_it = slot_ptr->find(xh);
+        const std::size_t node_pos = ( node_it == slot_ptr->cend() ) ? -1 : std::distance( slot_ptr->cbegin(), node_it );
+
+        cache.setrankInSlot( node_pos );
+        return node_pos != -1 ? 1 : 0;
     }
 
     /// Test if a Node exists within this slotCollection.
@@ -217,9 +221,9 @@ struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_val
     inline std::size_t count(node_type x) const
     {
         node_type xh = x.hash(), xabs = xh&node_type::maskpos;
-        const auto slot_ptr     = *this[findSlot(xabs, 0, size()-1)];
-        const std::size_t pos   = slot_ptr->find(xh);
-        return pos != -1 ? 1 : 0;
+        const auto slot_ptr     = (*this)[findSlot(xabs, 0, size()-1)];
+        const auto node_it      = slot_ptr->find(xh);
+        return node_it == slot_ptr->cend() ? 0 : 1;
     }
 
     //! remove all free bits from all nodes.
@@ -258,17 +262,17 @@ struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_val
         std::size_t wmax=0;
 
         maxslotsize = 0;
-        *this[0]->setStartrank(0);
-        *this[0]->setSlotrank(0);
+        (*this)[0]->setStartrank(0);
+        (*this)[0]->setSlotrank(0);
         for(std::size_t i=0; i<size(); ++i)
         {
             if (i > 0)
-                *this[i]->setStartrank(*this[i-1]->Startrank()+wmax);
-            wmax = *this[i]->size();
+                (*this)[i]->setStartrank((*this)[i-1]->Startrank()+wmax);
+            wmax = (*this)[i]->size();
             for(std::size_t j=0; j<wmax; ++j)
-                ++countlev[(*this[i])[j].level()];
+                ++countlev[((*this)[i])[j].level()];
             maxslotsize = std::max(maxslotsize, wmax);
-            *this[i]->setSlotrank(i);
+            (*this)[i]->setSlotrank(i);
         }
     }
 
@@ -291,15 +295,15 @@ struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_val
     {
         maxslotsize=0;
         std::size_t wmax=0;
-        *this[0]->setStartrank(0);
-        *this[0]->setSlotrank(0);
+        (*this)[0]->setStartrank(0);
+        (*this)[0]->setSlotrank(0);
         for(std::size_t i=0; i<size(); ++i)
         {
             if(i>0)
-                *this[i]->setStartrank(*this[i-1]->Startrank()+wmax);
-            wmax = *this[i]->Size();
+                (*this)[i]->setStartrank((*this)[i-1]->Startrank()+wmax);
+            wmax = (*this)[i]->Size();
             maxslotsize = std::max(maxslotsize,wmax);
-            *this[i]->setSlotrank(i);
+            (*this)[i]->setSlotrank(i);
         }
     }
     //!return maximum size of slots.

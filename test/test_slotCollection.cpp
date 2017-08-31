@@ -2,6 +2,7 @@
 #include <tuple>
 #include <tree/slot/slotCollection.hpp>
 #include <tree/node/node.hpp>
+#include <tree/slot/cache.hpp>
 
 #include <utility>
 
@@ -144,4 +145,39 @@ TYPED_TEST(SlotCollectionTest, nbNodes)
         SC.insert( node_type(i) );
         EXPECT_EQ( SC.nbNodes(), i+1 );
     }
+}
+
+TYPED_TEST(SlotCollectionTest, count)
+{
+    auto const dim = TestFixture::dim;
+    using value_type = typename TestFixture::value_type;
+    using node_type = Node<dim, value_type>;
+
+    slotCollection<dim, value_type> SC{2, 10, 10, 11};
+    node_type n1{1}, n2{2}, n3{3};
+    SC.insert(n1);
+    SC.insert(n2);
+    
+    EXPECT_EQ( SC.count( n1 ), 1 );
+    EXPECT_EQ( SC.count( n2 ), 1 );
+    EXPECT_EQ( SC.count( n3 ), 0 );
+}
+
+TYPED_TEST(SlotCollectionTest, count_with_cache)
+{
+    auto const dim = TestFixture::dim;
+    using value_type = typename TestFixture::value_type;
+    using node_type = Node<dim, value_type>;
+    using cache_type = Cache<dim, value_type>;
+
+    cache_type cache{};
+
+    slotCollection<dim, value_type> SC{2, 10, 10, 11};
+    node_type n1{1}, n2{2}, n3{3};
+    SC.insert(n1, cache);
+    SC.insert(n2, cache);
+    
+    EXPECT_EQ( SC.count( n1, cache ), 1 );
+    EXPECT_EQ( SC.count( n2, cache ), 1 );
+    EXPECT_EQ( SC.count( n3, cache ), 0 );
 }
