@@ -81,17 +81,6 @@ struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_val
         tbb::parallel_for_each(cbegin(), cend(), [&array](auto &sl){ sl->copyInArray(array.data()+sl->startRank()); });
     }
 
-    /// Is a Node abscissa in the interval [s1,s2[ ?
-    /// \param s1
-    /// \param s2
-    /// \param x Node to check.
-    /// \note x must be *not* hashed.
-    inline bool inInterval(node_type s1, node_type s2, node_type x) const
-    {
-        node_type xabs = x.hash()&node_type::maskpos;
-        return (s1<=xabs) && (s2>xabs);
-    }
-
     /// Store one node using a cache.
     /// \param x        the node to be inserted.
     /// \param cache    an external Cache.
