@@ -229,15 +229,6 @@ struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_val
         std::for_each(begin(), end(), [](auto& st){st->empty();});
     }
 
-    //! make a copy (in a set) of the Nodes.
-    //! \param setN  the set.
-    inline void makeExtern(SetNode& setN)
-    {
-        for (auto&st: this)
-            for(std::size_t i=0; i<st->size(); ++i)
-                setN.insert(st[i]);
-    }
-
     //! finalize: compute cumulsize (to allow rank function to work), and maximum
     //! size of slots;
     inline void finalize()
@@ -269,6 +260,7 @@ struct slotCollection : private std::vector< std::shared_ptr< slot<dim, node_val
             (*this)[i]->setSlotRank(i);
         }
     }
+
     //!return maximum size of slots.
     inline std::size_t maxSlotSize() const
     {
