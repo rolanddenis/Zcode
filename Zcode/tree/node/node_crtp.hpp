@@ -1,6 +1,8 @@
 #pragma once
 
 #include <tree/node/definitions.hpp>
+#include <tree/node/direction.hpp>
+
 #include <vector>
 
 
@@ -17,12 +19,130 @@ public:
 
     value_type value = 0;
 
-    //! return the hash code for nodes.
-    //! \param x Node
+    inline auto _get_dec(direction d) const
+    {
+        value_type bit = 0;
+        value_type mask = definition::XMask;
+        switch(d)
+        {
+            case (direction::x):
+                bit = definition::Xbit >> dim*level(); break;
+            case (direction::y):
+                bit = definition::Ybit >> dim*level(); mask >>= 1; break;
+            case (direction::z):
+                bit = definition::Zbit >> dim*level(); mask >>= 2; break;
+        }
+        return std::pair<value_type, value_type>{bit, mask};
+    }
+
+    inline value_type plus(direction d, std::size_t stencil=1) const
+    {
+        if (stencil == 0)
+            return value;
+
+        auto dummy = _get_dec(d);
+        auto bit = dummy.first;
+        auto mask = dummy.second;
+        value_type tmp = (definition::maskpos - mask);
+        value_type keep = (value&tmp) + (value&definition::levelzone);
+
+        value_type dec = 0;
+        for (std::size_t i=0; i<stencil; ++i)
+            dec = (dec|tmp) + bit;
+
+        value_type move = (value&mask) + (dec|tmp);
+        // if voidbit is True, keep it !!
+        value_type is_void = ((value&definition::voidbit)||(move&(~definition::maskpos)))? definition::voidbit: 0;
+        return ((move&mask)&definition::AllOnes[level()]) + keep + is_void;
+    }
+
+    inline value_type minus(direction d, std::size_t stencil=1) const{
+        auto dummy = _get_dec(d);
+        auto bit = dummy.first;
+        auto mask = dummy.second;
+        value_type tmp = (definition::maskpos - mask);
+        value_type keep = (value&tmp) + (value&definition::levelzone);
+
+        value_type dec = 0;
+        for (std::size_t i=0; i<stencil; ++i)
+            dec = (dec|tmp) + bit;
+
+        value_type move = (value&mask) - (dec&mask);
+        // if voidbit is True, keep it !!
+        value_type is_void = ((value&definition::voidbit)||(move&(~definition::maskpos)))? definition::voidbit: 0;
+        return ((move&mask)&definition::AllOnes[level()]) + keep + is_void;
+    }
+
+    inline void setLevel(std::size_t lev)
+    {
+        assert( lev < definition::nlevels );
+        value = (value&definition::maskpos) + (lev<<definition::levelshift);
+    }
+
+    // test if the znode is void.
+    inline bool isVoid() const
+    {
+        return value&definition::voidbit;
+    }
+
+    //! set the tag part of a znode
+    //! \param N pointer to the znode.
+    //! \param V tag value
+    //! \note we do not check V.
+    inline void setTags(derived_type const& n)
+    {
+        value = (value&definition::partWithoutFreeBits) + (n.value&definition::FreeBitsPart);
+    }
+
+    //! return the hash code for znode.
     //! \note we do not test if x is already hashed, except if DEBUG is set.
     inline value_type hash() const
     {
         return value + ( definition::XYZbit >> (dim*(level()+1)));
+    }
+
+    //! return the non hashed representation.
+    inline value_type unhash() const
+    {
+        return value - (definition::XYZbit>>(dim*(level()+1)));
+    }
+
+    //! Is a znode hashed?
+    inline bool isHashed() const
+    {
+        return value&(definition::XYZbit>>(dim*(level()+1)));
+    }
+
+    //! test if the znode has max coordinate
+    //! \param d: the direction.
+    inline bool isMax(direction d) const
+    {
+        // isMax: all bits set to 1.
+        value_type c = definition::Ones[level()]>>static_cast<value_type>(d);
+        return (value&c)==c;
+    }
+    //! test if the znode has min coordinate
+    //! \param  d: direction.
+    inline bool is_min(direction d) const
+    {
+        // isMin: all bits set to 0.
+        value_type c = definition::Ones[level()]>>static_cast<value_type>(d);
+        return (value&c)==0;
+    }
+
+    //! get the last level digits of a znode in an int (flushed right).
+    //! \param znode
+    //! \note this can be applied to hashed and non hashed Cells.
+    inline std::size_t lastlevel() const
+    {
+        auto l = level();
+        return (value&(definition::XYZbit>>(dim*l)))>> (dim*(definition::nlevels-l+1));
+    }
+
+    //! is a node minimal (ie has minimal abscissa) in his set of Brothers?
+    inline bool isMinimal() const
+    {
+        return !lastlevel();
     }
 
     //! Return the znode level.
@@ -85,74 +205,74 @@ protected:
 };
 
 
-template < std::size_t Dim, typename TValue = std::size_t >
-class Node
-    : public ZNode< Node<Dim, TValue>, Dim, TValue >
-{
-public:
-    using znode_type = ZNode< Node<Dim, TValue>, Dim, TValue >;
-    using znode_type::value;
-    using znode_type::value_type;
-    using znode_type::ZNode;
+// template < std::size_t Dim, typename TValue = std::size_t >
+// class Node
+//     : public ZNode< Node<Dim, TValue>, Dim, TValue >
+// {
+// public:
+//     using znode_type = ZNode< Node<Dim, TValue>, Dim, TValue >;
+//     using znode_type::value;
+//     using znode_type::value_type;
+//     using znode_type::ZNode;
 
-public:
-    Node( TValue v = 0 )
-        : znode_type( v )
-    {
-    }
+// public:
+//     Node( TValue v = 0 )
+//         : znode_type( v )
+//     {
+//     }
 
-};
+// };
 
-template < std::size_t Dim, typename TValue = std::size_t >
-std::ostream & operator<< ( std::ostream & out, Node<Dim, TValue> const& node )
-{
-    out << "Node: ";
-    node.print_value(out);
-    return out;
-}
+// template < std::size_t Dim, typename TValue = std::size_t >
+// std::ostream & operator<< ( std::ostream & out, Node<Dim, TValue> const& node )
+// {
+//     out << "Node: ";
+//     node.print_value(out);
+//     return out;
+// }
 
-//template < typename TChildren, std::size_t Dim, typename TValue = std::size_t >
-template < typename TChildren>
-class Slot
-    : public ZNode< Slot<TChildren>, TChildren::dim, typename TChildren::value_type >,
-      private std::vector< TChildren >
-{
-public:
-    using znode_type = ZNode< Slot<TChildren>, TChildren::dim, typename TChildren::value_type >;
+// //template < typename TChildren, std::size_t Dim, typename TValue = std::size_t >
+// template < typename TChildren>
+// class Slot
+//     : public ZNode< Slot<TChildren>, TChildren::dim, typename TChildren::value_type >,
+//       private std::vector< TChildren >
+// {
+// public:
+//     using znode_type = ZNode< Slot<TChildren>, TChildren::dim, typename TChildren::value_type >;
 
-    using znode_type::value;
-    using value_type = typename znode_type::value_type;
-    //using znode_type::value_type;
+//     using znode_type::value;
+//     using value_type = typename znode_type::value_type;
+//     //using znode_type::value_type;
 
-    using container_type = std::vector< TChildren >;
+//     using container_type = std::vector< TChildren >;
 
-    using container_type::push_back;
-    using container_type::operator[];
-    using container_type::begin;
-    using container_type::cbegin;
-    using container_type::end;
-    using container_type::cend;
-    using container_type::reserve;
+//     using container_type::push_back;
+//     using container_type::operator[];
+//     using container_type::begin;
+//     using container_type::cbegin;
+//     using container_type::end;
+//     using container_type::cend;
+//     using container_type::reserve;
 
-    Slot( value_type s1, std::size_t size )
-        : znode_type{s1}
-    {
-        reserve(size);
-    }
-};
+//     Slot( value_type s1, std::size_t size )
+//         : znode_type{s1}
+//     {
+//         reserve(size);
+//     }
+// };
 
-template < typename TChildren>
-std::ostream & operator<< ( std::ostream & out, Slot<TChildren> const & slot )
-{
-    out << "Slot: ";
-    slot.print_value( out );
-    out << std::endl;
+// template < typename TChildren>
+// std::ostream & operator<< ( std::ostream & out, Slot<TChildren> const & slot )
+// {
+//     out << "Slot: ";
+//     slot.print_value( out );
+//     out << std::endl;
 
-    for ( auto const& children : slot )
-        out << "\t" << children << std::endl;
+//     for ( auto const& children : slot )
+//         out << "\t" << children << std::endl;
     
-    return out;
-}
+//     return out;
+// }
 
-//template < std::size_t 
-//using SlotCollection = Slot<2, std::size_t, std::shared< Slot<2, std::size_t, Node<2, std::size_t> > >;
+// //template < std::size_t 
+// //using SlotCollection = Slot<2, std::size_t, std::shared< Slot<2, std::size_t, Node<2, std::size_t> > >;

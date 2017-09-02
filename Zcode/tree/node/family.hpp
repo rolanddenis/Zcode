@@ -1,5 +1,6 @@
 #pragma once
 
+#include <tree/node/definitions.hpp>
 #include <tree/node/node.hpp>
 #include <tree/node/neighbor.hpp>
 
@@ -7,85 +8,98 @@
 //! one in the son's brotherhood.
 //! \param u Node.
 //! \note we return a non hashed Node.
-template<std::size_t dim, typename value_type>
-inline Node<dim, value_type> firstSon(Node<dim, value_type> const& node)
+template<typename node_type>
+inline auto firstSon(node_type const& node)
 {
-    using node_type = Node<dim, value_type>;
-    //return {static_cast<type>(node.value + Node_type::levelone)};
-    return node + node_type::levelone;
+    using value_type = typename node_type::value_type;
+    using definition = definitions<node_type::dim, value_type>;
+    value_type output = node.value + definition::levelone;
+    return output;
 }
 
 //! return the son of a Node which has the largestlest absissa (ie, the last
 //! one in the son's brotherhood.
 //! \param u Node.
 //! \note we return a non hashed Node.
-template<typename Node_type>
-inline Node_type lastSon(Node_type const& node)
+template<typename node_type>
+inline auto lastSon(node_type const& node)
 {
-    using type = typename Node_type::type;
-    Node_type output{static_cast<type>(node.value + Node_type::levelone)};
-    output += Node_type::XYZbit>>(Node_type::dim*output.level());
+    using value_type = typename node_type::value_type;
+    using definition = definitions<node_type::dim, value_type>;
+    value_type output{static_cast<value_type>(node.value + definition::levelone)};
+    output += definition::XYZbit>>(definition::dim*output.level());
     return output;
 }  
 
 //! compute the father of a node
 //! \param  node: node.
-template<typename Node_type>
-inline Node_type father(Node_type const& node)
+template<typename node_type>
+inline auto father(node_type const& node)
 {
-    using type = typename Node_type::type;
+    using value_type = typename node_type::value_type;
+    using definition = definitions<node_type::dim, value_type>;
     auto level = node.level() - 1;
-    return {static_cast<type>((node.value&Node_type::AllOnes[level])+(level<<Node_type::levelshift))};
+    return static_cast<value_type>((node.value&definition::AllOnes[level])+(level<<definition::levelshift));
 }
 
 //! test if a Node A is an ancestor of a Node X.
 //! \param A Node 
 //! \param X Node
 //! \note each Node is its own ancestor, too.
-template<typename Node_type>
-inline bool isAncestor(Node_type A, Node_type X)
+template<typename node_type>
+inline bool isAncestor(node_type A, node_type X)
 {
-    return (A.level()<=X.level())
-        && (A.value&Node_type::maskpos) == (X.value&Node_type::AllOnes[A.level()]);
+    using value_type = typename node_type::value_type;
+    using definition = definitions<node_type::dim, value_type>;
+    return ( A.level() <= X.level())
+        && ( A.value&definition::maskpos) == (X.value&definition::AllOnes[A.level()]);
 }
 
 //! Do 2 Nodes share the same ancestor of a given level ?
 //! \param A Node
 //! \param B Node
 //! \param lv the level.
-template<typename Node_type>
-inline bool shareAncestor(Node_type A, Node_type B, std::size_t lv)
+template<typename node_type>
+inline bool shareAncestor(node_type A, node_type B, std::size_t lv)
 {
-    if(A.level()<lv||B.level()<lv)
+    using value_type = typename node_type::value_type;
+    using definition = definitions<node_type::dim, value_type>;
+    if( A.level() < lv || B.level() < lv )
         return false;
     else
     {
-        typename Node_type::type msk = Node_type::AllOnes[lv];
-        return (msk&A.value)==(msk&B.value);
+        auto msk = definition::AllOnes[lv];
+        return ( msk & A.value ) == ( msk & B.value );
     }
 }
 
 
-template<typename Node_type, typename Node_array>
-void brothers_impl(Node_type const& node, Node_array & Brothers, std::integral_constant<std::size_t, 1>)
+template<typename node_type, typename value_type>
+void brothers_impl(node_type const& node,
+                   std::array<value_type, 2> &brothers,
+                   std::integral_constant<std::size_t, 1>)
 {
     std::array<int, 2> stencil{0, 1};
-    neighbors(node, Brothers, stencil);
+    neighbors(node, brothers, stencil);
 }
 
-template<typename Node_type, typename Node_array>
-void brothers_impl(Node_type const& node, Node_array & Brothers, std::integral_constant<std::size_t, 2>)
+template<typename node_type, typename value_type>
+void brothers_impl(node_type const& node,
+                   std::array<value_type, 4> &brothers,
+                   std::integral_constant<std::size_t, 2>)
 {
     std::array<std::array<int, 2>, 4> stencil{{ {{0, 0}},
                                                 {{0, 1}},
                                                 {{1, 0}},
                                                 {{1, 1}}
                                              }};
-    neighbors(node, Brothers, stencil);
+    neighbors(node, brothers, stencil);
 }
 
-template<typename Node_type, typename Node_array>
-void brothers_impl(Node_type const& node, Node_array & Brothers, std::integral_constant<std::size_t, 3>)
+template<typename node_type, typename value_type = typename node_type::value_type>
+void brothers_impl(node_type const& node, 
+                   std::array<value_type, 8> &brothers,
+                   std::integral_constant<std::size_t, 3>)
 {
     std::array<std::array<int, 3>, 8> stencil{{ {{0, 0, 0}},
                                                 {{0, 1, 0}},
@@ -96,7 +110,7 @@ void brothers_impl(Node_type const& node, Node_array & Brothers, std::integral_c
                                                 {{1, 0, 1}},
                                                 {{1, 1, 1}}
                                              }};
-    neighbors(node, Brothers, stencil);
+    neighbors(node, brothers, stencil);
 }
 
 //! Make the list of the brothers of a minimal node in a brothers set.
