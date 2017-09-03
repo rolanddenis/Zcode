@@ -42,6 +42,7 @@ public:
     using container_type::cend;
     using container_type::reserve;
     using container_type::size;
+    using container_type::resize;
     using container_type::capacity;
 
     Slot( zvalue_type s1, std::size_t size=10 )
@@ -72,7 +73,7 @@ public:
     /// as given in parameter
     inline void removeTaggedChildren(zvalue_type tag)
     {
-        if (value&(tag&definition::FreeBitsPart))
+        if (this->hasTags(tag))
         {
             auto index = std::remove_if(begin(), end(), [&](auto const& node)
             {
@@ -80,7 +81,7 @@ public:
             });
             resize(std::distance(begin(), index));
         }
-        unsetTag(tag);
+        this->unsetTags(tag);
     }
 
     /// Remove all the children that have at least one bit
@@ -92,10 +93,8 @@ public:
             return (node.value&definition::FreeBitsPart);
         });
         resize(std::distance(begin(), index));
-        //clearAllTags();
+        this->clearAllTags();
     }
-
-
 };
 
 

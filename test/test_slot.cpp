@@ -75,6 +75,50 @@ TYPED_TEST(SlotTest, findChild)
     EXPECT_EQ( slot.findChild({11}), slot.end() );
 }
 
+TYPED_TEST(SlotTest, removeTaggedChildren)
+{
+    constexpr auto voidbit = TestFixture::definition::voidbit;
+    using cell_type = typename TestFixture::cell_type;
+    using slot_type = typename TestFixture::slot_type;
+
+    slot_type slot{0, 10};
+    std::array<cell_type, 10> cells;
+    for (std::size_t i=0; i<10; ++i)
+    {
+        cells[i] = i;
+        if (i&1)
+            cells[i].setTags(voidbit);
+    }
+    slot.insert(slot.begin(), cells.cbegin(), cells.cend());
+    EXPECT_EQ( slot.size(), 10 );
+    slot.setTags(voidbit);
+    slot.removeTaggedChildren(voidbit);
+    EXPECT_EQ( slot.size(), 5 );
+    for (std::size_t i = 0; i < 5; ++i)
+        EXPECT_EQ( slot[i].value, 2*i );
+}
+
+TYPED_TEST(SlotTest, removeTaggedChildren_all)
+{
+    constexpr auto voidbit = TestFixture::definition::voidbit;
+    using cell_type = typename TestFixture::cell_type;
+    using slot_type = typename TestFixture::slot_type;
+
+    slot_type slot{0, 10};
+    std::array<cell_type, 10> cells;
+    for (std::size_t i=0; i<10; ++i)
+    {
+        cells[i] = i;
+        if (i&1)
+            cells[i].setTags(voidbit);
+    }
+    slot.insert(slot.begin(), cells.cbegin(), cells.cend());
+    EXPECT_EQ( slot.size(), 10 );
+    slot.removeTaggedChildren();
+    EXPECT_EQ( slot.size(), 5 );
+    for (std::size_t i = 0; i < 5; ++i)
+        EXPECT_EQ( slot[i].value, 2*i );
+}
 
 // TYPED_TEST(SlotTest, markedOther)
 // {
