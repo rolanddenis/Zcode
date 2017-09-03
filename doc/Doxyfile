@@ -10,3 +10,4 @@ GENERATE_XML      = YES
 RECURSIVE         = YES
 QUIET             = YES
 JAVADOC_AUTOBRIEF = YES
+GENERATE_TAGFILE  = Library.tag
