@@ -134,7 +134,7 @@ public:
     }
     //! test if the znode has min coordinate
     //! \param  d: direction.
-    inline bool is_min(direction d) const
+    inline bool isMin(direction d) const
     {
         // isMin: all bits set to 0.
         zvalue_type c = definition::Ones[level()]>>static_cast<zvalue_type>(d);
