@@ -26,24 +26,76 @@ public:
     using znode_type = ZNode< Slot<TChildren>, TChildren::dim, typename TChildren::value_type >;
 
     using znode_type::value;
+    using znode_type::dim;
     using value_type = typename znode_type::value_type;
-    //using znode_type::value_type;
+    using definition = typename znode_type::definition;
+    using children_type = TChildren;
 
     using container_type = std::vector< TChildren >;
 
     using container_type::push_back;
+    using container_type::insert;
     using container_type::operator[];
     using container_type::begin;
     using container_type::cbegin;
     using container_type::end;
     using container_type::cend;
     using container_type::reserve;
+    using container_type::size;
+    using container_type::capacity;
 
     Slot( value_type s1, std::size_t size=10 )
         : znode_type{s1}
     {
         reserve(size);
     }
+
+    template<std::size_t array_size>
+    inline void copyChildrenInArray(std::array<children_type, array_size>  array) const
+    {
+        static_assert(array_size <= size());
+        for(std::size_t i=0; i<size(); i++)
+            array[i] = (*this)[i];
+    }
+
+    //! find a Node.
+    //! \param x: Node *hashed*
+    //! \note we *do* *not* *check* if x is hashed.
+    inline auto findChild(children_type const & node)
+    {
+        auto predicate = [&](auto const& child){return node.value==child.value;};
+        auto index = std::find_if(cbegin(), cend(), predicate);
+        return index;
+    }
+
+    /// Remove all the children that have the same tag
+    /// as given in parameter
+    inline void removeTaggedChildren(value_type tag)
+    {
+        if (value&(tag&definition::FreeBitsPart))
+        {
+            auto index = std::remove_if(begin(), end(), [&](auto const& node)
+            {
+                return ((node.value&definition::FreeBitsPart)==(tag&definition::FreeBitsPart));
+            });
+            resize(std::distance(begin(), index));
+        }
+        unsetTag(tag);
+    }
+
+    /// Remove all the children that have at least one bit
+    /// set to one in the freebitparts.
+    inline void removeTaggedChildren()
+    {
+        auto index = std::remove_if(begin(), end(), [&](auto const& node)
+        {
+            return (node.value&definition::FreeBitsPart);
+        });
+        resize(std::distance(begin(), index));
+        //clearAllTags();
+    }
+
+
 };
 
 
