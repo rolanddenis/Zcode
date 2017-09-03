@@ -12,7 +12,8 @@ void neighbors(node_type const& node,
                std::array<zvalue_type, nx> &node_array, 
                std::array<int, nx> const& stencilx)
 {
-    static_assert(std::is_same<zvalue_type, typename node_type::zvalue_type>::value);
+    static_assert(std::is_same<zvalue_type, typename node_type::zvalue_type>::value,
+                  "The element type of the output array is not the same as node_type.");
     std::size_t index = 0;
     for(auto &sx: stencilx)
     {
@@ -26,7 +27,8 @@ void neighbors(node_type const& node,
                std::array<int, nx> const& stencilx, 
                std::array<int, ny> const& stencily)
 {
-    static_assert(std::is_same<zvalue_type, typename node_type::zvalue_type>::value);
+    static_assert(std::is_same<zvalue_type, typename node_type::zvalue_type>::value,
+                  "The element type of the output array is not the same as node_type.");
     using cell_type = Cell<node_type::dim, zvalue_type>;
     using definition = definitions<node_type::dim, zvalue_type>;
 
@@ -49,7 +51,9 @@ void neighbors(node_type const& node,
                std::array<zvalue_type, ns> &node_array, 
                std::array<std::array<int, 2>, ns> const& stencil)
 {
-    static_assert(std::is_same<zvalue_type, typename node_type::zvalue_type>::value);
+    static_assert(std::is_same<zvalue_type, typename node_type::zvalue_type>::value,
+                  "The element type of the output array is not the same as node_type.");
+
     using cell_type = Cell<node_type::dim, zvalue_type>;
     std::size_t index = 0;
     for(auto &s: stencil)
@@ -64,7 +68,8 @@ void neighbors(node_type const& node,
                std::array<zvalue_type, ns> &node_array, 
                std::array<std::array<int, 3>, ns> const& stencil)
 {
-    static_assert(std::is_same<zvalue_type, typename node_type::zvalue_type>::value);
+    static_assert(std::is_same<zvalue_type, typename node_type::zvalue_type>::value,
+                  "The element type of the output array is not the same as node_type.");
     using cell_type = Cell<node_type::dim, zvalue_type>;
     std::size_t index = 0;
     for(auto &s: stencil)
@@ -82,7 +87,8 @@ void neighbors(node_type const& node,
                std::array<int, ny> const& stencily, 
                std::array<int, nz> const& stencilz)
 {
-    static_assert(std::is_same<zvalue_type, typename node_type::zvalue_type>::value);
+    static_assert(std::is_same<zvalue_type, typename node_type::zvalue_type>::value,
+                  "The element type of the output array is not the same as node_type.");
     using cell_type = Cell<node_type::dim, zvalue_type>;
     std::size_t index = 0;
     for(auto &sz: stencilz)
@@ -109,7 +115,8 @@ void boxNeighbors_impl(node_type const& node,
                        std::array<zvalue_type, array_size> &neighbors_array, 
                        std::integral_constant<std::size_t, 1>)
 {
-    static_assert(array_size == ipow(2*stencil+1, node_type::dim));
+    static_assert(array_size == ipow(2*stencil+1, node_type::dim),
+                  "The array size is not good.");
     std::array<int, 2*stencil+1> const s{Stencil_array<stencil>()};
     neighbors(node, neighbors_array, s);
 }
@@ -119,7 +126,8 @@ void boxNeighbors_impl(node_type const& node,
                        std::array<zvalue_type, array_size> &neighbors_array, 
                        std::integral_constant<std::size_t, 2>)
 {
-    static_assert(array_size == ipow(2*stencil+1, node_type::dim));
+    static_assert(array_size == ipow(2*stencil+1, node_type::dim),
+                  "The array size is not good.");
     std::array<int, 2*stencil+1> const s{Stencil_array<stencil>()};
     neighbors(node, neighbors_array, s, s);
 }
@@ -129,7 +137,8 @@ void boxNeighbors_impl(node_type const& node,
                        std::array<zvalue_type, array_size> &neighbors_array, 
                        std::integral_constant<std::size_t, 3>)
 {
-    static_assert(array_size == ipow(2*stencil+1, node_type::dim));
+    static_assert(array_size == ipow(2*stencil+1, node_type::dim),
+                  "The array size is not good.");
     std::array<int, 2*stencil+1> const s{Stencil_array<stencil>()};
     neighbors(node, neighbors_array, s, s, s);
 }
@@ -153,7 +162,8 @@ void starNeighbors_impl(node_type const& node,
                         std::array<zvalue_type, array_size> &neighbors_array, 
                         std::integral_constant<std::size_t, 1>)
 {
-    static_assert(array_size == 2*stencil*node_type::dim);
+    static_assert(array_size == 2*stencil*node_type::dim,
+                  "The array size is not good.");
     std::array<int, 2*stencil> s;
     std::size_t index = 0;
     for (int i=-stencil; i<=stencil; ++i)
@@ -169,7 +179,8 @@ void starNeighbors_impl(node_type const& node,
                         std::array<zvalue_type, array_size> &neighbors_array, 
                         std::integral_constant<std::size_t, 2>)
 {
-    static_assert(array_size == 2*stencil*node_type::dim);
+    static_assert(array_size == 2*stencil*node_type::dim,
+                  "The array size is not good.");    
     std::array<std::array<int, 2>, 4*stencil> s;
     std::size_t index = 0;
     for (int i=-stencil; i<=stencil; ++i)
@@ -186,7 +197,8 @@ void starNeighbors_impl(node_type const& node,
                         std::array<zvalue_type, array_size> &neighbors_array, 
                         std::integral_constant<std::size_t, 3>)
 {
-    static_assert(array_size == 2*stencil*node_type::dim);
+    static_assert(array_size == 2*stencil*node_type::dim,
+                  "The array size is not good.");
     std::array<std::array<int, 3>, 6*stencil> s;
     std::size_t index = 0;
     for (int i=-stencil; i<=stencil; ++i)

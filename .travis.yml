@@ -61,7 +61,7 @@ before_install:
         export CXX=clang++ CC=clang;
       fi
 install:
-    - cmake -DDOWNLOAD_GTEST=ON .
+    - cmake -DDOWNLOAD_GTEST=ON -DCMAKE_CXX_FLAGS="${EXTRA_FLAGS}" .
     - make VERBOSE=1 -j2 test_zcode
     - cd test
 script:

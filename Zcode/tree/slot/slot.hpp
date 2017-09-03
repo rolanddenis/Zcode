@@ -54,7 +54,9 @@ public:
     template<std::size_t array_size>
     inline void copyChildrenInArray(std::array<children_type, array_size>  array) const
     {
-        static_assert(array_size <= size());
+        static_assert(array_size <= size(),
+                      "The output array size is not large enough.");
+
         for(std::size_t i=0; i<size(); i++)
             array[i] = (*this)[i];
     }
