@@ -14,10 +14,10 @@ class Cell
 public:
     using znode_type = ZNode< Cell<Dim, TValue>, Dim, TValue >;
     using znode_type::value;
-    using znode_type::value_type;
+    using znode_type::zvalue_type;
     using znode_type::ZNode;
     using znode_type::dim;
-    
+
 public:
     Cell( TValue v = 0 )
         : znode_type( v )

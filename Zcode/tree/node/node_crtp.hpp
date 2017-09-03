@@ -14,15 +14,15 @@ class ZNode
 public:
     static constexpr std::size_t dim = Dim;
     using derived_type  = TDerived;
-    using value_type    = TValue;
-    using definition    = definitions<dim, value_type>;
+    using zvalue_type    = TValue;
+    using definition    = definitions<dim, zvalue_type>;
 
-    value_type value = 0;
+    zvalue_type value = 0;
 
     inline auto _get_dec(direction d) const
     {
-        value_type bit = 0;
-        value_type mask = definition::XMask;
+        zvalue_type bit = 0;
+        zvalue_type mask = definition::XMask;
         switch(d)
         {
             case (direction::x):
@@ -32,10 +32,10 @@ public:
             case (direction::z):
                 bit = definition::Zbit >> dim*level(); mask >>= 2; break;
         }
-        return std::pair<value_type, value_type>{bit, mask};
+        return std::pair<zvalue_type, zvalue_type>{bit, mask};
     }
 
-    inline value_type plus(direction d, std::size_t stencil=1) const
+    inline zvalue_type plus(direction d, std::size_t stencil=1) const
     {
         if (stencil == 0)
             return value;
@@ -43,33 +43,33 @@ public:
         auto dummy = _get_dec(d);
         auto bit = dummy.first;
         auto mask = dummy.second;
-        value_type tmp = (definition::maskpos - mask);
-        value_type keep = (value&tmp) + (value&definition::levelzone);
+        zvalue_type tmp = (definition::maskpos - mask);
+        zvalue_type keep = (value&tmp) + (value&definition::levelzone);
 
-        value_type dec = 0;
+        zvalue_type dec = 0;
         for (std::size_t i=0; i<stencil; ++i)
             dec = (dec|tmp) + bit;
 
-        value_type move = (value&mask) + (dec|tmp);
+        zvalue_type move = (value&mask) + (dec|tmp);
         // if voidbit is True, keep it !!
-        value_type is_void = ((value&definition::voidbit)||(move&(~definition::maskpos)))? definition::voidbit: 0;
+        zvalue_type is_void = ((value&definition::voidbit)||(move&(~definition::maskpos)))? definition::voidbit: 0;
         return ((move&mask)&definition::AllOnes[level()]) + keep + is_void;
     }
 
-    inline value_type minus(direction d, std::size_t stencil=1) const{
+    inline zvalue_type minus(direction d, std::size_t stencil=1) const{
         auto dummy = _get_dec(d);
         auto bit = dummy.first;
         auto mask = dummy.second;
-        value_type tmp = (definition::maskpos - mask);
-        value_type keep = (value&tmp) + (value&definition::levelzone);
+        zvalue_type tmp = (definition::maskpos - mask);
+        zvalue_type keep = (value&tmp) + (value&definition::levelzone);
 
-        value_type dec = 0;
+        zvalue_type dec = 0;
         for (std::size_t i=0; i<stencil; ++i)
             dec = (dec|tmp) + bit;
 
-        value_type move = (value&mask) - (dec&mask);
+        zvalue_type move = (value&mask) - (dec&mask);
         // if voidbit is True, keep it !!
-        value_type is_void = ((value&definition::voidbit)||(move&(~definition::maskpos)))? definition::voidbit: 0;
+        zvalue_type is_void = ((value&definition::voidbit)||(move&(~definition::maskpos)))? definition::voidbit: 0;
         return ((move&mask)&definition::AllOnes[level()]) + keep + is_void;
     }
 
@@ -87,14 +87,14 @@ public:
 
     //! set the tag part of a znode
     //! \param tags tag value
-    inline void setTags(const value_type & tags)
+    inline void setTags(const zvalue_type & tags)
     {
         value |= tags&definition::FreeBitsPart;
     }
 
     //! suppress given tags
     //! \param tags 
-    inline void unsetTags(const value_type & tags)
+    inline void unsetTags(const zvalue_type & tags)
     {
         value ^= (tags&definition::FreeBitsPart)&(value&definition::FreeBitsPart);
     }
@@ -107,13 +107,13 @@ public:
 
     //! return the hash code for znode.
     //! \note we do not test if x is already hashed, except if DEBUG is set.
-    inline value_type hash() const
+    inline zvalue_type hash() const
     {
         return value + ( definition::XYZbit >> (dim*(level()+1)));
     }
 
     //! return the non hashed representation.
-    inline value_type unhash() const
+    inline zvalue_type unhash() const
     {
         return value - (definition::XYZbit>>(dim*(level()+1)));
     }
@@ -129,7 +129,7 @@ public:
     inline bool isMax(direction d) const
     {
         // isMax: all bits set to 1.
-        value_type c = definition::Ones[level()]>>static_cast<value_type>(d);
+        zvalue_type c = definition::Ones[level()]>>static_cast<zvalue_type>(d);
         return (value&c)==c;
     }
     //! test if the znode has min coordinate
@@ -137,7 +137,7 @@ public:
     inline bool is_min(direction d) const
     {
         // isMin: all bits set to 0.
-        value_type c = definition::Ones[level()]>>static_cast<value_type>(d);
+        zvalue_type c = definition::Ones[level()]>>static_cast<zvalue_type>(d);
         return (value&c)==0;
     }
 
@@ -172,7 +172,7 @@ public:
         const std::size_t nlevels    = definition::nlevels;
         const std::size_t levelshift = definition::levelshift;
 
-        value_type IntOne{1};//!<! 1!
+        zvalue_type IntOne{1};//!<! 1!
 
         for( int i = size-1; i >= 0; i-- )
         {
@@ -212,7 +212,7 @@ public:
 
 
 public:
-    ZNode( value_type v = 0 )
+    ZNode( zvalue_type v = 0 )
         : value(v)
     {
     }
@@ -229,7 +229,7 @@ protected:
 // public:
 //     using znode_type = ZNode< Node<Dim, TValue>, Dim, TValue >;
 //     using znode_type::value;
-//     using znode_type::value_type;
+//     using znode_type::zvalue_type;
 //     using znode_type::ZNode;
 
 // public:
@@ -251,15 +251,15 @@ protected:
 // //template < typename TChildren, std::size_t Dim, typename TValue = std::size_t >
 // template < typename TChildren>
 // class Slot
-//     : public ZNode< Slot<TChildren>, TChildren::dim, typename TChildren::value_type >,
+//     : public ZNode< Slot<TChildren>, TChildren::dim, typename TChildren::zvalue_type >,
 //       private std::vector< TChildren >
 // {
 // public:
-//     using znode_type = ZNode< Slot<TChildren>, TChildren::dim, typename TChildren::value_type >;
+//     using znode_type = ZNode< Slot<TChildren>, TChildren::dim, typename TChildren::zvalue_type >;
 
 //     using znode_type::value;
-//     using value_type = typename znode_type::value_type;
-//     //using znode_type::value_type;
+//     using zvalue_type = typename znode_type::zvalue_type;
+//     //using znode_type::zvalue_type;
 
 //     using container_type = std::vector< TChildren >;
 
@@ -271,7 +271,7 @@ protected:
 //     using container_type::cend;
 //     using container_type::reserve;
 
-//     Slot( value_type s1, std::size_t size )
+//     Slot( zvalue_type s1, std::size_t size )
 //         : znode_type{s1}
 //     {
 //         reserve(size);

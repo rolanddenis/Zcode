@@ -8,9 +8,9 @@
 template <typename T>
 struct SlotTest: public ::testing::Test { 
     static const std::size_t dim = std::tuple_element<0, T>::type::value;
-    using value_type = typename std::tuple_element<1, T>::type;
+    using zvalue_type = typename std::tuple_element<1, T>::type;
 
-    using cell_type = Cell<dim, value_type>;
+    using cell_type = Cell<dim, zvalue_type>;
     using slot_type = Slot<cell_type>;
     using definition = typename slot_type::definition;
 };

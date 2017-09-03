@@ -19,15 +19,15 @@ void myreplace_if(ForwardIt first, ForwardIt last,
 
 template < typename TChildren>
 class Slot
-    : public ZNode< Slot<TChildren>, TChildren::dim, typename TChildren::value_type >,
+    : public ZNode< Slot<TChildren>, TChildren::dim, typename TChildren::zvalue_type >,
       private std::vector< TChildren >
 {
 public:
-    using znode_type = ZNode< Slot<TChildren>, TChildren::dim, typename TChildren::value_type >;
+    using znode_type = ZNode< Slot<TChildren>, TChildren::dim, typename TChildren::zvalue_type >;
 
     using znode_type::value;
     using znode_type::dim;
-    using value_type = typename znode_type::value_type;
+    using zvalue_type = typename znode_type::zvalue_type;
     using definition = typename znode_type::definition;
     using children_type = TChildren;
 
@@ -44,7 +44,7 @@ public:
     using container_type::size;
     using container_type::capacity;
 
-    Slot( value_type s1, std::size_t size=10 )
+    Slot( zvalue_type s1, std::size_t size=10 )
         : znode_type{s1}
     {
         reserve(size);
@@ -70,7 +70,7 @@ public:
 
     /// Remove all the children that have the same tag
     /// as given in parameter
-    inline void removeTaggedChildren(value_type tag)
+    inline void removeTaggedChildren(zvalue_type tag)
     {
         if (value&(tag&definition::FreeBitsPart))
         {
@@ -105,10 +105,10 @@ public:
 // ///
 // /// \brief slot structures, store a set of Nodes.
 // ////////////////////////////////////////////////////////////////////////////
-// template < std::size_t dim, typename node_value_type = std::size_t >
-// struct slot: private std::vector< Node<dim, node_value_type> >
+// template < std::size_t dim, typename node_zvalue_type = std::size_t >
+// struct slot: private std::vector< Node<dim, node_zvalue_type> >
 // {
-//     using node_type = Node<dim, node_value_type>;
+//     using node_type = Node<dim, node_zvalue_type>;
 //     using parent = std::vector<node_type>;
 //     using parent::operator[];
 //     using parent::push_back;
@@ -124,10 +124,10 @@ public:
 //     using parent::capacity;
 //     using parent::shrink_to_fit;
 
-//     static const node_value_type FreeBitsPart = node_type::FreeBitsPart;
-//     static const node_value_type voidbit = node_type::voidbit;
-//     static const node_value_type maskpos = node_type::maskpos;
-//     static const node_value_type decal = dim*node_type::nlevels;
+//     static const node_zvalue_type FreeBitsPart = node_type::FreeBitsPart;
+//     static const node_zvalue_type voidbit = node_type::voidbit;
+//     static const node_zvalue_type maskpos = node_type::maskpos;
+//     static const node_zvalue_type decal = dim*node_type::nlevels;
 
 //     node_type s1{0}, s2{node_type::AllOnes[node_type::nlevels-1]};
 
@@ -279,7 +279,7 @@ public:
 //     //! \param mark for the test.
 //     bool markedOther(node_type mark)
 //     {
-//         node_type N{static_cast<node_value_type>(FreeBitsPart-mark.value)};
+//         node_type N{static_cast<node_zvalue_type>(FreeBitsPart-mark.value)};
 //         const unsigned char m = (N.value&FreeBitsPart)>>decal;
 //         return slotMark&m;
 //     }
@@ -461,8 +461,8 @@ public:
 //     void restore(std::ifstream& f)
 //     {
 //         std::size_t ssize;
-//         node_value_type ss1;
-//         node_value_type ss2;
+//         node_zvalue_type ss1;
+//         node_zvalue_type ss2;
 //         f >> ssize;
 //         f >> ss2;
 //         f >> ss1;
@@ -471,7 +471,7 @@ public:
 //         s2 = ss2;
 //         for(std::size_t j=0; j<ssize; j++)
 //         {
-//             node_value_type N;
+//             node_zvalue_type N;
 //             f >> N;
 //             put(node_type{N});
 //         }
@@ -479,8 +479,8 @@ public:
 
 // };
 
-// template<std::size_t dim, typename node_value_type>
-// std::ostream& operator<<(std::ostream& os, const slot<dim, node_value_type>& sl)
+// template<std::size_t dim, typename node_zvalue_type>
+// std::ostream& operator<<(std::ostream& os, const slot<dim, node_zvalue_type>& sl)
 // {
 //     os << "slot\n";
 //     os << "s1: " << sl.s1 << "\n";
