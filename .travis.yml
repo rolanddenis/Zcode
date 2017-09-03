@@ -35,8 +35,8 @@ matrix:
           packages:
             - clang-3.8
       env:
-	- COMPILER=clang CLANG=3.8
-	- EXTRA_FLAGS="-stdlib=libc++"
+	      - COMPILER=clang CLANG=3.8
+	      - EXTRA_FLAGS="-stdlib=libc++"
     - os: osx
       osx_image: xcode7.3
       compiler: clang
