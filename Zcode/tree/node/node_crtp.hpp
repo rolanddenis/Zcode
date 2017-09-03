@@ -86,12 +86,23 @@ public:
     }
 
     //! set the tag part of a znode
-    //! \param N pointer to the znode.
-    //! \param V tag value
-    //! \note we do not check V.
-    inline void setTags(derived_type const& n)
+    //! \param tags tag value
+    inline void setTags(const value_type & tags)
     {
-        value = (value&definition::partWithoutFreeBits) + (n.value&definition::FreeBitsPart);
+        value |= tags&definition::FreeBitsPart;
+    }
+
+    //! suppress given tags
+    //! \param tags 
+    inline void unsetTags(const value_type & tags)
+    {
+        value ^= (tags&definition::FreeBitsPart)&(value&definition::FreeBitsPart);
+    }
+
+    //! Suppress all the tags
+    inline void clearAllTags()
+    {
+        value &= ~definition::FreeBitsPart;
     }
 
     //! return the hash code for znode.
