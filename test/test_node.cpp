@@ -22,6 +22,7 @@ struct CellTest: public ::testing::Test {
                                                 Slot<Cell<dim, value_type>>>::type;
 
     using definition = definitions<dim, value_type>;
+
     static const value_type Xbit = definition::Xbit;
     static const value_type Ybit = definition::Ybit;
     static const value_type Zbit = definition::Zbit;
@@ -61,7 +62,7 @@ TYPED_TEST_CASE(CellTest, CellTypes);
 
 TYPED_TEST(CellTest, constructor)
 {
-    auto const dim = TestFixture::dim;
+    constexpr auto dim = TestFixture::dim;
     using value_type = typename TestFixture::value_type;
     using node_type = typename TestFixture::node_type;
 
@@ -71,7 +72,7 @@ TYPED_TEST(CellTest, constructor)
 
 TYPED_TEST(CellTest, level)
 {
-    auto const dim = TestFixture::dim;
+    constexpr auto dim = TestFixture::dim;
     using value_type = typename TestFixture::value_type;
     using node_type = typename TestFixture::node_type;
 
@@ -83,9 +84,9 @@ TYPED_TEST(CellTest, level)
 
 TYPED_TEST(CellTest, isVoid)
 {
-    auto const dim = TestFixture::dim;
+    constexpr auto dim = TestFixture::dim;
     using value_type = typename TestFixture::value_type;
-    using definition = definitions<dim, value_type>;
+    using definition = typename TestFixture::definition;
     using node_type = typename TestFixture::node_type;
 
     node_type cell{0};
@@ -96,20 +97,19 @@ TYPED_TEST(CellTest, isVoid)
 
 TYPED_TEST(CellTest, setTags)
 {
-    auto const dim = TestFixture::dim;
+    constexpr auto dim = TestFixture::dim;
+    constexpr auto voidbit = TestFixture::definition::voidbit;
     using value_type = typename TestFixture::value_type;
-    using definition = definitions<dim, value_type>;
     using node_type = typename TestFixture::node_type;
 
     node_type cell{0};
-    node_type voidCell{definition::voidbit};
-    cell.setTags(voidCell);
-    EXPECT_EQ( cell.value , voidCell.value );
+    cell.setTags(voidbit);
+    EXPECT_EQ( cell.value , voidbit );
 }
 
 TYPED_TEST(CellTest, hash)
 {
-    auto const dim = TestFixture::dim;
+    constexpr auto dim = TestFixture::dim;
     using value_type = typename TestFixture::value_type;
     using node_type = typename TestFixture::node_type;
 
@@ -123,9 +123,9 @@ TYPED_TEST(CellTest, hash)
 
 TYPED_TEST(CellTest, brothers)
 {
-    auto const dim = TestFixture::dim;
+    constexpr auto dim = TestFixture::dim;
     using value_type = typename TestFixture::value_type;
-    using definition = definitions<dim, value_type>;
+    using definition = typename TestFixture::definition;
     using node_type = typename TestFixture::node_type;
 
     node_type cell{0};
@@ -148,28 +148,28 @@ TYPED_TEST(CellTest, brothers)
 
 TYPED_TEST(CellTest, box)
 {
-    auto const dim = TestFixture::dim;
+    constexpr auto dim = TestFixture::dim;
+    constexpr std::size_t stencil = 1; 
+
     using value_type = typename TestFixture::value_type;
-    using definition = definitions<dim, value_type>;
     using node_type = typename TestFixture::node_type;
 
-
-    constexpr std::size_t stencil = 1; 
     std::array<value_type, ipow(2*stencil+1, dim)> b;
     node_type cell{0};
     boxNeighbors<stencil>(cell, b);
+    // TODO: add the test
 }
 
 TYPED_TEST(CellTest, star)
 {
-    auto const dim = TestFixture::dim;
+    constexpr auto dim = TestFixture::dim;
+    constexpr std::size_t stencil = 1; 
+
     using value_type = typename TestFixture::value_type;
-    using definition = definitions<dim, value_type>;
     using node_type = typename TestFixture::node_type;
 
-
-    constexpr std::size_t stencil = 1; 
     std::array<value_type, 2*stencil*dim> b;
     node_type cell{0};
-    starNeighbors<stencil>(cell, b);    
+    starNeighbors<stencil>(cell, b);
+    // TODO: add the test
 }
