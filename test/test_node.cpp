@@ -107,6 +107,19 @@ TYPED_TEST(CellTest, setTags)
     EXPECT_EQ( cell.value , voidbit );
 }
 
+TYPED_TEST(CellTest, hasTags)
+{
+    constexpr auto dim = TestFixture::dim;
+    constexpr auto voidbit = TestFixture::definition::voidbit;
+    using value_type = typename TestFixture::value_type;
+    using node_type = typename TestFixture::node_type;
+
+    node_type cell{0};
+    EXPECT_EQ( cell.hasTags(voidbit) , false );
+    cell.setTags(voidbit);
+    EXPECT_EQ( cell.hasTags(voidbit) , true );
+}
+
 TYPED_TEST(CellTest, hash)
 {
     constexpr auto dim = TestFixture::dim;

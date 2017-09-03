@@ -99,6 +99,11 @@ public:
         value ^= (tags&definition::FreeBitsPart)&(value&definition::FreeBitsPart);
     }
 
+    inline bool hasTags(const zvalue_type & tags)
+    {
+        return (value&tags)&definition::FreeBitsPart;
+    }
+
     //! Suppress all the tags
     inline void clearAllTags()
     {
