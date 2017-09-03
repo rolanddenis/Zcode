@@ -3,7 +3,7 @@
 
 int main()
 {
-    using node_type = Node<2, std::size_t>;
+    using node_type = Cell<2, std::size_t>;
     
     node_type node{2};
 

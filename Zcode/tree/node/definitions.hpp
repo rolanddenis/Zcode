@@ -28,14 +28,14 @@ struct definitions
     static const value_type firstfreebit = one<<(dim*nlevels);
 
     //! amount of right shift needed to get level in the tree. 
-    static const int levelshift = size-nblevelbits;
+    static constexpr int levelshift = size-nblevelbits;
     //! first digit marking levels:
     static constexpr value_type levelone = one<<levelshift;
     //using levelone = std::integral_constant<value_type, one<<levelshift>;
     //! mask for extracting level:
-    static const value_type levelmask = AllSet2One<dim, nblevelbits, value_type>::value; 
+    static constexpr value_type levelmask = AllSet2One<dim, nblevelbits, value_type>::value; 
     //! mask the part used to store level
-    static const value_type levelzone = (levelmask)<<levelshift;
+    static constexpr value_type levelzone = (levelmask)<<levelshift;
     //! mask for  what is used for position:
     static constexpr value_type maskpos = AllSet2One<dim, dim*nlevels, value_type>::value;
 
