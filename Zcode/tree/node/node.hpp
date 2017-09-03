@@ -15,7 +15,6 @@ public:
     using znode_type = ZNode< Cell<Dim, TValue>, Dim, TValue >;
     using znode_type::value;
     using zvalue_type = typename znode_type::zvalue_type;
-    using ZNode = typename znode_type::ZNode;
     using znode_type::dim;
 
 public:
