@@ -11,9 +11,9 @@
 template<typename node_type>
 inline auto firstSon(node_type const& node)
 {
-    using value_type = typename node_type::value_type;
-    using definition = definitions<node_type::dim, value_type>;
-    value_type output = node.value + definition::levelone;
+    using zvalue_type = typename node_type::zvalue_type;
+    using definition = definitions<node_type::dim, zvalue_type>;
+    zvalue_type output = node.value + definition::levelone;
     return output;
 }
 
@@ -24,9 +24,9 @@ inline auto firstSon(node_type const& node)
 template<typename node_type>
 inline auto lastSon(node_type const& node)
 {
-    using value_type = typename node_type::value_type;
-    using definition = definitions<node_type::dim, value_type>;
-    value_type output{static_cast<value_type>(node.value + definition::levelone)};
+    using zvalue_type = typename node_type::zvalue_type;
+    using definition = definitions<node_type::dim, zvalue_type>;
+    zvalue_type output{static_cast<zvalue_type>(node.value + definition::levelone)};
     output += definition::XYZbit>>(definition::dim*output.level());
     return output;
 }  
@@ -36,10 +36,10 @@ inline auto lastSon(node_type const& node)
 template<typename node_type>
 inline auto father(node_type const& node)
 {
-    using value_type = typename node_type::value_type;
-    using definition = definitions<node_type::dim, value_type>;
+    using zvalue_type = typename node_type::zvalue_type;
+    using definition = definitions<node_type::dim, zvalue_type>;
     auto level = node.level() - 1;
-    return static_cast<value_type>((node.value&definition::AllOnes[level])+(level<<definition::levelshift));
+    return static_cast<zvalue_type>((node.value&definition::AllOnes[level])+(level<<definition::levelshift));
 }
 
 //! test if a Node A is an ancestor of a Node X.
@@ -49,8 +49,8 @@ inline auto father(node_type const& node)
 template<typename node_type>
 inline bool isAncestor(node_type A, node_type X)
 {
-    using value_type = typename node_type::value_type;
-    using definition = definitions<node_type::dim, value_type>;
+    using zvalue_type = typename node_type::zvalue_type;
+    using definition = definitions<node_type::dim, zvalue_type>;
     return ( A.level() <= X.level())
         && ( A.value&definition::maskpos) == (X.value&definition::AllOnes[A.level()]);
 }
@@ -62,8 +62,8 @@ inline bool isAncestor(node_type A, node_type X)
 template<typename node_type>
 inline bool shareAncestor(node_type A, node_type B, std::size_t lv)
 {
-    using value_type = typename node_type::value_type;
-    using definition = definitions<node_type::dim, value_type>;
+    using zvalue_type = typename node_type::zvalue_type;
+    using definition = definitions<node_type::dim, zvalue_type>;
     if( A.level() < lv || B.level() < lv )
         return false;
     else
@@ -74,18 +74,18 @@ inline bool shareAncestor(node_type A, node_type B, std::size_t lv)
 }
 
 
-template<typename node_type, typename value_type>
+template<typename node_type, typename zvalue_type>
 void brothers_impl(node_type const& node,
-                   std::array<value_type, 2> &brothers,
+                   std::array<zvalue_type, 2> &brothers,
                    std::integral_constant<std::size_t, 1>)
 {
     std::array<int, 2> stencil{0, 1};
     neighbors(node, brothers, stencil);
 }
 
-template<typename node_type, typename value_type>
+template<typename node_type, typename zvalue_type>
 void brothers_impl(node_type const& node,
-                   std::array<value_type, 4> &brothers,
+                   std::array<zvalue_type, 4> &brothers,
                    std::integral_constant<std::size_t, 2>)
 {
     std::array<std::array<int, 2>, 4> stencil{{ {{0, 0}},
@@ -96,9 +96,9 @@ void brothers_impl(node_type const& node,
     neighbors(node, brothers, stencil);
 }
 
-template<typename node_type, typename value_type = typename node_type::value_type>
+template<typename node_type, typename zvalue_type = typename node_type::zvalue_type>
 void brothers_impl(node_type const& node, 
-                   std::array<value_type, 8> &brothers,
+                   std::array<zvalue_type, 8> &brothers,
                    std::integral_constant<std::size_t, 3>)
 {
     std::array<std::array<int, 3>, 8> stencil{{ {{0, 0, 0}},
