@@ -192,6 +192,12 @@ public:
         out << s;
     }
 
+    inline derived_type& operator+=(derived_type const& node)
+    {
+        value += node.value;
+        return derived();
+    }
+
 
 public:
     derived_type & derived()
