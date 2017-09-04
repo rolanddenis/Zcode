@@ -1,7 +1,7 @@
 build: 
   verbosity: detailed
 
-os: Visual Studio 2015
+os: Visual Studio 2017
 
 install:
   ############################################################################
@@ -40,7 +40,7 @@ before_build:
   - call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd64
   - cd C:\projects\Zcode
   - set TBB_INSTALL_DIR=C:\projects\deps\tbb
-  - set TBB_ARCH_PLATFORM=intel64/vc14
+  - set TBB_ARCH_PLATFORM=intel64/vc17
 
 build_script:
   - cmake -G "NMake Makefiles" -DCMAKE_CXX_COMPILER=clang-cl -DDOWNLOAD_GTEST=ON .

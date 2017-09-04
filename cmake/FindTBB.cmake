@@ -132,6 +132,8 @@ if(NOT TBB_FOUND)
     # Set the TBB search library path search suffix based on the version of VC
     if(WINDOWS_STORE)
       set(TBB_LIB_PATH_SUFFIX "lib/${TBB_ARCHITECTURE}/vc11_ui")
+    elseif(MSVC17)
+      set(TBB_LIB_PATH_SUFFIX "lib/${TBB_ARCHITECTURE}/vc17")
     elseif(MSVC14)
       set(TBB_LIB_PATH_SUFFIX "lib/${TBB_ARCHITECTURE}/vc14")
     elseif(MSVC12)
