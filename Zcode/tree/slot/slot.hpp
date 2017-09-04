@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <fstream>
 
-// #include <tree/node/node.hpp>
 #include <tree/node/node_crtp.hpp>
 
 template<class ForwardIt, class UnaryPredicate, class UnaryFunction>

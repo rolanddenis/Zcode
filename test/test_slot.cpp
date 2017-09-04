@@ -1,7 +1,6 @@
 #include "gtest/gtest.h"
 #include <tuple>
-#include <tree/slot/slot.hpp>
-#include <tree/node/node.hpp>
+#include <tree/slot/pack.hpp>
 
 #define DIM_GROUP(T) std::tuple<std::integral_constant<std::size_t, 1>, T>, std::tuple<std::integral_constant<std::size_t, 2>, T>, std::tuple<std::integral_constant<std::size_t, 3>, T>
 
@@ -10,9 +9,9 @@ struct SlotTest: public ::testing::Test {
     static const std::size_t dim = std::tuple_element<0, T>::type::value;
     using zvalue_type = typename std::tuple_element<1, T>::type;
 
-    using cell_type = Cell<dim, zvalue_type>;
-    using slot_type = Slot<cell_type>;
-    using definition = typename slot_type::definition;
+    using cellpack_type = CellPack<dim, zvalue_type>;
+    using cell_type = typename cellpack_type::children_type;
+    using definition = typename cellpack_type::definition;
 };
 
 typedef ::testing::Types<DIM_GROUP(unsigned short), DIM_GROUP(unsigned int), DIM_GROUP(std::size_t)> SlotTypes;
@@ -21,9 +20,9 @@ TYPED_TEST_CASE(SlotTest, SlotTypes);
 TYPED_TEST(SlotTest, constructor)
 {
     using cell_type = typename TestFixture::cell_type;
-    using slot_type = typename TestFixture::slot_type;
+    using cellpack_type = typename TestFixture::cellpack_type;
 
-    slot_type slot{1, 10};
+    cellpack_type slot{1, 10};
     EXPECT_EQ( slot.value, 1 );
     EXPECT_EQ( slot.capacity(), 10 );
     EXPECT_EQ( slot.size(), 0 );
@@ -32,9 +31,9 @@ TYPED_TEST(SlotTest, constructor)
 TYPED_TEST(SlotTest, putNode)
 {
     using cell_type = typename TestFixture::cell_type;
-    using slot_type = typename TestFixture::slot_type;
+    using cellpack_type = typename TestFixture::cellpack_type;
 
-    slot_type slot{0, 10};
+    cellpack_type slot{0, 10};
     cell_type zero{0};
     cell_type one{1};
     slot.push_back({0});
@@ -47,9 +46,9 @@ TYPED_TEST(SlotTest, putNode)
 TYPED_TEST(SlotTest, insertNodes)
 {
     using cell_type = typename TestFixture::cell_type;
-    using slot_type = typename TestFixture::slot_type;
+    using cellpack_type = typename TestFixture::cellpack_type;
 
-    slot_type slot{0, 10};
+    cellpack_type slot{0, 10};
     cell_type zero{0};
     cell_type one{1};
     std::array<cell_type, 2> cells{zero, one};
@@ -62,9 +61,9 @@ TYPED_TEST(SlotTest, insertNodes)
 TYPED_TEST(SlotTest, findChild)
 {
     using cell_type = typename TestFixture::cell_type;
-    using slot_type = typename TestFixture::slot_type;
+    using cellpack_type = typename TestFixture::cellpack_type;
 
-    slot_type slot{0, 10};
+    cellpack_type slot{0, 10};
     std::array<cell_type, 10> cells;
     for (std::size_t i=0; i<10; ++i)
         cells[i] = i;
@@ -79,9 +78,9 @@ TYPED_TEST(SlotTest, removeTaggedChildren)
 {
     constexpr auto voidbit = TestFixture::definition::voidbit;
     using cell_type = typename TestFixture::cell_type;
-    using slot_type = typename TestFixture::slot_type;
+    using cellpack_type = typename TestFixture::cellpack_type;
 
-    slot_type slot{0, 10};
+    cellpack_type slot{0, 10};
     std::array<cell_type, 10> cells;
     for (std::size_t i=0; i<10; ++i)
     {
@@ -102,9 +101,9 @@ TYPED_TEST(SlotTest, removeTaggedChildren_all)
 {
     constexpr auto voidbit = TestFixture::definition::voidbit;
     using cell_type = typename TestFixture::cell_type;
-    using slot_type = typename TestFixture::slot_type;
+    using cellpack_type = typename TestFixture::cellpack_type;
 
-    slot_type slot{0, 10};
+    cellpack_type slot{0, 10};
     std::array<cell_type, 10> cells;
     for (std::size_t i=0; i<10; ++i)
     {
