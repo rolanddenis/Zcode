@@ -200,7 +200,7 @@ public:
     inline derived_type& operator+=(derived_type const& node)
     {
         value += node.value;
-        return derived();
+        return *this;
     }
 
 
