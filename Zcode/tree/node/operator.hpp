@@ -1,5 +1,5 @@
 #pragma once
-#include <tree/node/node.hpp>
+#include <tree/node/cell.hpp>
 
 template <std::size_t dim, typename value_type>
 inline Node<dim, value_type> operator+(Node<dim, value_type> const& node1, Node<dim, value_type> const& node2)

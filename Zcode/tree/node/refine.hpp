@@ -1,6 +1,6 @@
 #pragma once
 
-#include <tree/node/node.hpp>
+#include <tree/node/cell.hpp>
 
 //! refine n. Results in refined[0: treetype-1].
 //! \param  n: node.

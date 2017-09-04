@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 #include <tuple>
 #include <tree/node/definitions.hpp>
-#include <tree/node/node.hpp>
+#include <tree/node/cell.hpp>
 #include <tree/node/family.hpp>
 #include <tree/node/util.hpp>
 #include <tree/slot/slot.hpp>

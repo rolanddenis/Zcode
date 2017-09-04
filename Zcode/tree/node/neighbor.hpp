@@ -2,7 +2,7 @@
 
 #include <tree/node/definitions.hpp>
 #include <tree/node/direction.hpp>
-#include <tree/node/node.hpp>
+#include <tree/node/cell.hpp>
 #include <tree/node/util.hpp>
 
 #include <type_traits>

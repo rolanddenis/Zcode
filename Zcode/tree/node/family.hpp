@@ -1,7 +1,7 @@
 #pragma once
 
 #include <tree/node/definitions.hpp>
-#include <tree/node/node.hpp>
+#include <tree/node/cell.hpp>
 #include <tree/node/neighbor.hpp>
 
 //! return the son of a Node which has the smallest absissa (ie, the 1rst
