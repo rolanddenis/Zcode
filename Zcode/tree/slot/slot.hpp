@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <fstream>
 
-#include <tree/node/node_crtp.hpp>
+#include <tree/node/znode.hpp>
 
 template<class ForwardIt, class UnaryPredicate, class UnaryFunction>
 void myreplace_if(ForwardIt first, ForwardIt last,

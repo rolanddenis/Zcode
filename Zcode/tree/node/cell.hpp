@@ -4,7 +4,7 @@
 #include <string>
 #include <cassert>
 
-#include <tree/node/node_crtp.hpp>
+#include <tree/node/znode.hpp>
 
 
 template < std::size_t Dim, typename TValue = std::size_t >
