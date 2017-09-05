@@ -50,8 +50,8 @@ include_directories(${GTEST_INCLUDE_DIRS})
 set(ZCODE_TESTS
     main.cpp
     test_node.cpp
-    test_slot.cpp
-    test_slotCollection.cpp
+    test_cellpack.cpp
+    #test_slotCollection.cpp
 )
 
 set(ZCODE_TARGET test_zcode)
@@ -60,5 +60,5 @@ add_executable(${ZCODE_TARGET} ${ZCODE_TESTS} ${ZCODE_HEADERS})
 if(DOWNLOAD_GTEST OR GTEST_SRC_DIR)
     add_dependencies(${ZCODE_TARGET} gtest_main)
 endif()
-target_link_libraries(${ZCODE_TARGET} ${GTEST_BOTH_LIBRARIES} tbb)
+target_link_libraries(${ZCODE_TARGET} ${GTEST_BOTH_LIBRARIES} ${TBB_LIBRARIES})
 add_custom_target(ztest COMMAND test_zcode DEPENDS ${ZCODE_TARGET})

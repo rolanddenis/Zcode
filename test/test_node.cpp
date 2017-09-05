@@ -1,18 +1,31 @@
 #include "gtest/gtest.h"
 #include <tuple>
-#include <tree/node/node.hpp>
+#include <tree/node/definitions.hpp>
+#include <tree/node/cell.hpp>
 #include <tree/node/family.hpp>
 #include <tree/node/util.hpp>
+#include <tree/slot/slot.hpp>
 
-#define DIM_GROUP(T) std::tuple<std::integral_constant<std::size_t, 1>, T>, std::tuple<std::integral_constant<std::size_t, 2>, T>, std::tuple<std::integral_constant<std::size_t, 3>, T>
+#define DIM_GROUP(T, isSlot) std::tuple<std::integral_constant<std::size_t, 1>, T, isSlot>, std::tuple<std::integral_constant<std::size_t, 2>, T, isSlot>, std::tuple<std::integral_constant<std::size_t, 3>, T, isSlot>
+
+struct test_slot {};
+struct test_cell {};
 
 template <typename T>
-struct NodeTest: public ::testing::Test { 
+struct CellTest: public ::testing::Test { 
     static const std::size_t dim = std::tuple_element<0, T>::type::value;
     using value_type = typename std::tuple_element<1, T>::type;
-    static const value_type Xbit = Node<dim, value_type>::Xbit;
-    static const value_type Ybit = Node<dim, value_type>::Ybit;
-    static const value_type Zbit = Node<dim, value_type>::Zbit;
+    using isCell = typename std::tuple_element<2, T>::type;
+
+    using node_type = typename std::conditional<std::is_same<isCell, test_cell>::value, 
+                                                Cell<dim, value_type>, 
+                                                Slot<Cell<dim, value_type>>>::type;
+
+    using definition = definitions<dim, value_type>;
+
+    static const value_type Xbit = definition::Xbit;
+    static const value_type Ybit = definition::Ybit;
+    static const value_type Zbit = definition::Zbit;
 
     auto build_brothers(std::integral_constant<std::size_t, 1>)
     {
@@ -39,84 +52,137 @@ struct NodeTest: public ::testing::Test {
     }
 };
 
-typedef ::testing::Types<DIM_GROUP(unsigned short), DIM_GROUP(unsigned int), DIM_GROUP(std::size_t)> NodeTypes;
-TYPED_TEST_CASE(NodeTest, NodeTypes);
+typedef ::testing::Types<DIM_GROUP(unsigned short, test_cell),
+                         DIM_GROUP(unsigned int  , test_cell),
+                         DIM_GROUP(std::size_t   , test_cell),
+                         DIM_GROUP(unsigned short, test_slot),
+                         DIM_GROUP(unsigned int  , test_slot),
+                         DIM_GROUP(std::size_t   , test_slot)> CellTypes;
+TYPED_TEST_CASE(CellTest, CellTypes);
 
-TYPED_TEST(NodeTest, constructor)
+TYPED_TEST(CellTest, constructor)
 {
-    auto const dim = TestFixture::dim;
+    constexpr auto dim = TestFixture::dim;
     using value_type = typename TestFixture::value_type;
+    using node_type = typename TestFixture::node_type;
 
-    Node<dim, value_type> node{};
-    EXPECT_EQ( node.value, 0 );
+    node_type cell{0};
+    EXPECT_EQ( cell.value, 0 );
 }
 
-TYPED_TEST(NodeTest, level)
+TYPED_TEST(CellTest, level)
 {
-    auto const dim = TestFixture::dim;
+    constexpr auto dim = TestFixture::dim;
     using value_type = typename TestFixture::value_type;
+    using node_type = typename TestFixture::node_type;
 
-    Node<dim, value_type> node{};
-    EXPECT_EQ( node.level(), 0 );
-    node.set_level(2);
-    EXPECT_EQ( node.level(), 2 );
+    node_type cell{0};
+    EXPECT_EQ( cell.level(), 0 );
+    cell.setLevel(2);
+    EXPECT_EQ( cell.level(), 2 );
 }
 
-TYPED_TEST(NodeTest, is_void)
+TYPED_TEST(CellTest, isVoid)
 {
-    auto const dim = TestFixture::dim;
+    constexpr auto dim = TestFixture::dim;
     using value_type = typename TestFixture::value_type;
-    using node_type = Node<dim, value_type>;
+    using definition = typename TestFixture::definition;
+    using node_type = typename TestFixture::node_type;
 
-    node_type node{};
-    EXPECT_EQ( node.isVoid(), false );
-    node.value += node_type::voidbit; 
-    EXPECT_EQ( node.isVoid(), true );
+    node_type cell{0};
+    EXPECT_EQ( cell.isVoid(), false );
+    cell.value += definition::voidbit; 
+    EXPECT_EQ( cell.isVoid(), true );
 }
 
-TYPED_TEST(NodeTest, setTags)
+TYPED_TEST(CellTest, setTags)
 {
-    auto const dim = TestFixture::dim;
+    constexpr auto dim = TestFixture::dim;
+    constexpr auto voidbit = TestFixture::definition::voidbit;
     using value_type = typename TestFixture::value_type;
-    using node_type = Node<dim, value_type>;
+    using node_type = typename TestFixture::node_type;
 
-    node_type node{};
-    node_type voidNode{node_type::voidbit};
-    node.setTags(voidNode);
-    EXPECT_EQ( node , voidNode );
+    node_type cell{0};
+    cell.setTags(voidbit);
+    EXPECT_EQ( cell.value , voidbit );
 }
 
-TYPED_TEST(NodeTest, hash)
+TYPED_TEST(CellTest, hasTags)
 {
-    auto const dim = TestFixture::dim;
+    constexpr auto dim = TestFixture::dim;
+    constexpr auto voidbit = TestFixture::definition::voidbit;
     using value_type = typename TestFixture::value_type;
-    using node_type = Node<dim, value_type>;
+    using node_type = typename TestFixture::node_type;
 
-    node_type node{};
-    EXPECT_EQ( node.isHashed(), false );
-    auto node_hash = node.hash();
-    EXPECT_EQ( node_hash.isHashed(), true );
-    auto node_unhash = node_hash.unhash();
-    EXPECT_EQ( node_unhash.isHashed(), false );
+    node_type cell{0};
+    EXPECT_EQ( cell.hasTags(voidbit) , false );
+    cell.setTags(voidbit);
+    EXPECT_EQ( cell.hasTags(voidbit) , true );
 }
 
-TYPED_TEST(NodeTest, brothers)
+TYPED_TEST(CellTest, hash)
 {
-    auto const dim = TestFixture::dim;
+    constexpr auto dim = TestFixture::dim;
     using value_type = typename TestFixture::value_type;
-    using node_type = Node<dim, value_type>;
+    using node_type = typename TestFixture::node_type;
 
-    for ( std::size_t level = 0; level < node_type::nlevels; ++level)
+    node_type cell{0};
+    EXPECT_EQ( cell.isHashed(), false );
+    node_type cell_hash = cell.hash();
+    EXPECT_EQ( cell_hash.isHashed(), true );
+    node_type cell_unhash = cell_hash.unhash();
+    EXPECT_EQ( cell_unhash.isHashed(), false );
+}
+
+TYPED_TEST(CellTest, brothers)
+{
+    constexpr auto dim = TestFixture::dim;
+    using value_type = typename TestFixture::value_type;
+    using definition = typename TestFixture::definition;
+    using node_type = typename TestFixture::node_type;
+
+    node_type cell{0};
+
+    for ( std::size_t level = 0; level < definition::nlevels; ++level)
     {
-        node_type node{};
-        std::array<node_type, ipow(2, dim)> b;
-        node.set_level(level);
-        brothers(node, b);
+        node_type cell{0};
+        std::array<value_type, ipow(2, dim)> b;
+        cell.setLevel(level);
+        brothers(cell, b);
         auto btrue = TestFixture::build_brothers(level);
         for (std::size_t i = 0; i<btrue.size(); ++i)
         {
-            b[i].set_level(0);
-            EXPECT_EQ( b[i].value, btrue[i] );
+            node_type c = b[i];
+            c.setLevel(0);
+            EXPECT_EQ( c.value, btrue[i] );
         }
     }
+}
+
+TYPED_TEST(CellTest, box)
+{
+    constexpr auto dim = TestFixture::dim;
+    constexpr std::size_t stencil = 1; 
+
+    using value_type = typename TestFixture::value_type;
+    using node_type = typename TestFixture::node_type;
+
+    std::array<value_type, ipow(2*stencil+1, dim)> b;
+    node_type cell{0};
+    boxNeighbors<stencil>(cell, b);
+    // TODO: add the test
+}
+
+TYPED_TEST(CellTest, star)
+{
+    constexpr auto dim = TestFixture::dim;
+    constexpr std::size_t stencil = 1; 
+
+    using value_type = typename TestFixture::value_type;
+    using node_type = typename TestFixture::node_type;
+
+    std::array<value_type, 2*stencil*dim> b;
+    node_type cell{0};
+    starNeighbors<stencil>(cell, b);
+    // TODO: add the test
 }

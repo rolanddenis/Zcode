@@ -1,7 +1,13 @@
 build: 
   verbosity: detailed
 
-os: Visual Studio 2015
+os: Visual Studio 2017
+
+# init:
+#   - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+
+# on_finish:
+#   - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
 install:
   ############################################################################
@@ -28,7 +34,7 @@ install:
   - 7z x tbb.zip -oC:\projects\deps > nul
   - move C:\projects\deps\tbb2017* C:\projects\deps\tbb # Move to a version-agnostic directory
   - dir C:\projects\deps
-  - call "C:\projects\deps\tbb\bin\tbbvars.bat" intel64 vs2015
+  - call "C:\projects\deps\tbb\bin\tbbvars.bat" intel64 vs2017
 
   ############################################################################
   # Setup the path to Clang-cl
@@ -39,7 +45,6 @@ install:
 before_build:
   - call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd64
   - cd C:\projects\Zcode
-
 
 build_script:
   - cmake -G "NMake Makefiles" -DCMAKE_CXX_COMPILER=clang-cl -DDOWNLOAD_GTEST=ON .

@@ -25,6 +25,7 @@ matrix:
             - llvm-toolchain-precise-3.7
           packages:
             - clang-3.7
+            - libc++-dev
       env: COMPILER=clang CLANG=3.7
     - os: linux
       addons:
@@ -34,7 +35,18 @@ matrix:
             - llvm-toolchain-precise-3.8
           packages:
             - clang-3.8
+            - libc++-dev
       env: COMPILER=clang CLANG=3.8
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-precise-3.9
+          packages:
+            - clang-3.9
+            - libc++-dev
+      env: COMPILER=clang CLANG=3.9
     - os: osx
       osx_image: xcode7.3
       compiler: clang
@@ -52,6 +64,7 @@ before_install:
         if [[ "$COMPILER" == "clang" ]]; then
           sudo apt-get install libtbb-dev;
           export CXX=clang++-$CLANG CC=clang-$CLANG;
+          export CXXFLAGS="-stdlib=libc++";
         fi
       elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
         brew update;
